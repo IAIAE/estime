@@ -1,12 +1,9 @@
-# estime
-estime = ecmascript + runtime, in javascipt(es5) environment
+# eval5
 
 under developing....
 功能开发中，如果要使用，请使用初版[eval5](https://github.com/bplok20010/eval5)
 
-基于 TypeScript 编写的 JavaScript 解释器。初版fork于[eval5](https://github.com/bplok20010/eval5)，目标是原生支持es2015语法和JSX且修改bug，持续开发中.....，进度请查看最后的[todoList](#todoList)
-
-新开一个repo的原因是改得太多了。很难再去提mq，且原作者貌似不太回issue。
+基于 TypeScript 编写的 JavaScript 解释器。初版fork于[eval5](https://github.com/bplok20010/eval5)，目标是加入es2015语法和JSX的支持，持续开发中.....，进度请查看最后的[todoList](#todoList)
 
 目前处于hot开发中....每天估计都会有更新，不稳定。请先不要使用
 
@@ -28,7 +25,7 @@ todo:
 ## 使用
 
 ```javascript
-import { Interpreter } from "estime";
+import { Interpreter } from "eval5";
 
 const interpreter = new Interpreter(window, {
 	timeout: 1000,
@@ -65,7 +62,7 @@ interface Options {
 Example
 
 ```
-import { Interpreter } from "estime";
+import { Interpreter } from "eval5";
 
 const ctx = {};
 const interpreter = new Interpreter(ctx, {
@@ -97,14 +94,14 @@ window.a;//undefined
 ```js
 Interpreter.global = window;
 const interpreter = new Interpreter();
-interpreter.evaluate('alert("hello estime")');
+interpreter.evaluate('alert("hello eval5")');
 ```
 
 **`globalContextInFunction`**
 
 默认值: `undefined`
 
-`estime` 不支持 `use strict` 严格模式, 在非严格下的函数中`this`默认指向的是全局作用域，但在`estime`中是`undefined`， 你可以通过`globalContextInFunction`来设置默认指向。
+`eval5` 不支持 `use strict` 严格模式, 在非严格下的函数中`this`默认指向的是全局作用域，但在`eval5`中是`undefined`， 你可以通过`globalContextInFunction`来设置默认指向。
 
 ```js
 import { Interpreter } from "Interpreter";
@@ -151,9 +148,9 @@ const ctx = {alert: alert};
 const interpreter = new Interpreter(ctx);
 
 interpreter.evaluate(`
-// alert.call({}, 'Hello estime')
+// alert.call({}, 'Hello eval5')
 // Illegal invocation
-alert('Hello estime');
+alert('Hello eval5');
 `);
 ```
 
@@ -208,7 +205,7 @@ console.log(result); // 300
 > 注: 该函数每次执行都会创建一个新的解释器
 
 ```js
-import { evaluate } from " estime";
+import { evaluate } from "eval5";
 
 evaluate(
 	`
@@ -229,7 +226,7 @@ evaluate(`
 该函数会将`Interpreter.global` `Interpreter.globalContextInFunction`当作默认值并创建新的解释器
 
 ```js
-import { Function } from "estime";
+import { Function } from "eval5";
 
 const func = new Function("a", "b", "return a+b;");
 console.log(func(100, 200)); // 300
@@ -295,8 +292,5 @@ MIT
 - [ ] Class
   - [ ] 基础声明
   - [ ] extends
-- [ ] 箭头函数
-  - [ ] 基础执行支持
-  - [ ] context绑定
 - [ ] JSX支持
 - [ ]

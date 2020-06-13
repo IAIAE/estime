@@ -1,0 +1,332 @@
+/**
+class Test {
+    constructor(name){
+        this.name = name
+    }
+    getName(){
+        return this.name
+    }
+    render(){
+        return <div class="name">
+            hello world
+        </div>
+    }
+}
+
+let t = new Test('richcao')
+t.getName()
+*/
+{
+    "type": "Program",
+    "start": 0,
+    "end": 250,
+    "body": [
+        {
+            "type": "ClassDeclaration",
+            "start": 1,
+            "end": 208,
+            "id": {
+                "type": "Identifier",
+                "start": 7,
+                "end": 11,
+                "name": "Test"
+            },
+            "superClass": null,
+            "body": {
+                "type": "ClassBody",
+                "start": 12,
+                "end": 208,
+                "body": [
+                    {
+                        "type": "MethodDefinition",
+                        "start": 18,
+                        "end": 67,
+                        "kind": "constructor",
+                        "static": false,
+                        "computed": false,
+                        "key": {
+                            "type": "Identifier",
+                            "start": 18,
+                            "end": 29,
+                            "name": "constructor"
+                        },
+                        "value": {
+                            "type": "FunctionExpression",
+                            "start": 29,
+                            "end": 67,
+                            "id": null,
+                            "expression": false,
+                            "generator": false,
+                            "async": false,
+                            "params": [
+                                {
+                                    "type": "Identifier",
+                                    "start": 30,
+                                    "end": 34,
+                                    "name": "name"
+                                }
+                            ],
+                            "body": {
+                                "type": "BlockStatement",
+                                "start": 35,
+                                "end": 67,
+                                "body": [
+                                    {
+                                        "type": "ExpressionStatement",
+                                        "start": 45,
+                                        "end": 61,
+                                        "expression": {
+                                            "type": "AssignmentExpression",
+                                            "start": 45,
+                                            "end": 61,
+                                            "operator": "=",
+                                            "left": {
+                                                "type": "MemberExpression",
+                                                "start": 45,
+                                                "end": 54,
+                                                "object": {
+                                                    "type": "ThisExpression",
+                                                    "start": 45,
+                                                    "end": 49
+                                                },
+                                                "property": {
+                                                    "type": "Identifier",
+                                                    "start": 50,
+                                                    "end": 54,
+                                                    "name": "name"
+                                                },
+                                                "computed": false
+                                            },
+                                            "right": {
+                                                "type": "Identifier",
+                                                "start": 57,
+                                                "end": 61,
+                                                "name": "name"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "type": "MethodDefinition",
+                        "start": 72,
+                        "end": 113,
+                        "kind": "method",
+                        "static": false,
+                        "computed": false,
+                        "key": {
+                            "type": "Identifier",
+                            "start": 72,
+                            "end": 79,
+                            "name": "getName"
+                        },
+                        "value": {
+                            "type": "FunctionExpression",
+                            "start": 79,
+                            "end": 113,
+                            "id": null,
+                            "expression": false,
+                            "generator": false,
+                            "async": false,
+                            "params": [],
+                            "body": {
+                                "type": "BlockStatement",
+                                "start": 81,
+                                "end": 113,
+                                "body": [
+                                    {
+                                        "type": "ReturnStatement",
+                                        "start": 91,
+                                        "end": 107,
+                                        "argument": {
+                                            "type": "MemberExpression",
+                                            "start": 98,
+                                            "end": 107,
+                                            "object": {
+                                                "type": "ThisExpression",
+                                                "start": 98,
+                                                "end": 102
+                                            },
+                                            "property": {
+                                                "type": "Identifier",
+                                                "start": 103,
+                                                "end": 107,
+                                                "name": "name"
+                                            },
+                                            "computed": false
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "type": "MethodDefinition",
+                        "start": 118,
+                        "end": 206,
+                        "kind": "method",
+                        "static": false,
+                        "computed": false,
+                        "key": {
+                            "type": "Identifier",
+                            "start": 118,
+                            "end": 124,
+                            "name": "render"
+                        },
+                        "value": {
+                            "type": "FunctionExpression",
+                            "start": 124,
+                            "end": 206,
+                            "id": null,
+                            "expression": false,
+                            "generator": false,
+                            "async": false,
+                            "params": [],
+                            "body": {
+                                "type": "BlockStatement",
+                                "start": 126,
+                                "end": 206,
+                                "body": [
+                                    {
+                                        "type": "ReturnStatement",
+                                        "start": 136,
+                                        "end": 200,
+                                        "argument": {
+                                            "type": "JSXElement",
+                                            "start": 143,
+                                            "end": 200,
+                                            "openingElement": {
+                                                "type": "JSXOpeningElement",
+                                                "start": 143,
+                                                "end": 161,
+                                                "attributes": [
+                                                    {
+                                                        "type": "JSXAttribute",
+                                                        "start": 148,
+                                                        "end": 160,
+                                                        "name": {
+                                                            "type": "JSXIdentifier",
+                                                            "start": 148,
+                                                            "end": 153,
+                                                            "name": "class"
+                                                        },
+                                                        "value": {
+                                                            "type": "Literal",
+                                                            "start": 154,
+                                                            "end": 160,
+                                                            "value": "name",
+                                                            "raw": "\"name\""
+                                                        }
+                                                    }
+                                                ],
+                                                "name": {
+                                                    "type": "JSXIdentifier",
+                                                    "start": 144,
+                                                    "end": 147,
+                                                    "name": "div"
+                                                },
+                                                "selfClosing": false
+                                            },
+                                            "closingElement": {
+                                                "type": "JSXClosingElement",
+                                                "start": 194,
+                                                "end": 200,
+                                                "name": {
+                                                    "type": "JSXIdentifier",
+                                                    "start": 196,
+                                                    "end": 199,
+                                                    "name": "div"
+                                                }
+                                            },
+                                            "children": [
+                                                {
+                                                    "type": "JSXText",
+                                                    "start": 161,
+                                                    "end": 194,
+                                                    "value": "\n            hello world\n        ",
+                                                    "raw": "\n            hello world\n        "
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "VariableDeclaration",
+            "start": 210,
+            "end": 237,
+            "declarations": [
+                {
+                    "type": "VariableDeclarator",
+                    "start": 214,
+                    "end": 237,
+                    "id": {
+                        "type": "Identifier",
+                        "start": 214,
+                        "end": 215,
+                        "name": "t"
+                    },
+                    "init": {
+                        "type": "NewExpression",
+                        "start": 218,
+                        "end": 237,
+                        "callee": {
+                            "type": "Identifier",
+                            "start": 222,
+                            "end": 226,
+                            "name": "Test"
+                        },
+                        "arguments": [
+                            {
+                                "type": "Literal",
+                                "start": 227,
+                                "end": 236,
+                                "value": "richcao",
+                                "raw": "'richcao'"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "kind": "let"
+        },
+        {
+            "type": "ExpressionStatement",
+            "start": 238,
+            "end": 249,
+            "expression": {
+                "type": "CallExpression",
+                "start": 238,
+                "end": 249,
+                "callee": {
+                    "type": "MemberExpression",
+                    "start": 238,
+                    "end": 247,
+                    "object": {
+                        "type": "Identifier",
+                        "start": 238,
+                        "end": 239,
+                        "name": "t"
+                    },
+                    "property": {
+                        "type": "Identifier",
+                        "start": 240,
+                        "end": 247,
+                        "name": "getName"
+                    },
+                    "computed": false
+                },
+                "arguments": []
+            }
+        }
+    ],
+    "sourceType": "script"
+}
+
