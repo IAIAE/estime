@@ -289,6 +289,8 @@ MIT
 
 
 # todoList
+es2015的相关特性可以看[这里](https://babeljs.io/docs/en/learn/)，并不一定全部实现。但常用的都会实现的。
+
 - [x] 块级作用域
   - [x] let
   - [x] const
@@ -298,4 +300,37 @@ MIT
 - [ ] 箭头函数
   - [ ] 基础执行支持
   - [ ] context绑定
+- [ ] 解构
+- [ ] 函数参数解构
+- [ ] Map + Set + WeakMap + WeakSet
+  - [ ] Map
+  - [ ] Set
+  - [ ] WeakMap
+  - [ ] WeakSet
+- [ ] for-of
+- [ ] Template Strings
+- [ ] Symbols
+- [ ] Promises
+- [ ] Generators
+- [ ] Math + Number + String + Object APIs
+  - [ ] Math 类的非原生支持的话，开销太大，不支持。
+  - [ ] String.includes
+  - [ ] String.repeat
+  - [ ] Number.EPSILON
+  - [ ] Number.isInteger
+  - [ ] Number.isNaN
+  - [ ] Array::from
+  - [ ] Array::of
+  - [ ] Array.fill
+  - [ ] Array.findIndex
+  - [ ] Array.entries
+  - [ ] Array.keys
+  - [ ] Array.values
+  - [ ] Object.assign
+- [ ] Binary and Octal Literals 二进制和八进制字面量
+- [ ] Unicode，看情况实现
+- [ ] Reflect API，看情况实现
+- [ ] Module\export\import 不实现
+- [ ] Proxies 代理，不实现，日常开发中也不推荐使用
+- [ ] Tail Calls，尾递归优化，算是优化，非特性。先不做处理
 - [ ] JSX支持
