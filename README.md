@@ -289,9 +289,9 @@ MIT
 
 
 # todoList
-- [ ] 块级作用域
+- [x] 块级作用域
   - [x] let
-  - [ ] const
+  - [x] const
 - [ ] Class
   - [ ] 基础声明
   - [ ] extends
