@@ -1,5 +1,44 @@
 import { Interpreter } from "../../src";
 
+test("ConstDeclaration-0-1", () => {
+    let res;
+    let inter = new Interpreter({
+        rt: (val)=>{res = val},
+        console: console,
+    }, {
+        ecmaVersion: 2015,
+    })
+    inter.evaluate( `
+(function(){
+    var test = 123;
+    if(true){
+        const test = 1
+        rt(test)
+    }
+})();
+`);
+    expect(res).toEqual(1);
+});
+test("ConstDeclaration-0-2", () => {
+    let res;
+    let inter = new Interpreter({
+        rt: (val)=>{res = val},
+    }, {
+        ecmaVersion: 2015,
+    })
+    inter.evaluate( `
+var t = 12;
+(function(t){
+    var t = 123;
+    if(true){
+        const t = 1
+    }
+    rt(t)
+})(t);
+`);
+    expect(res).toEqual(123);
+});
+
 test("ConstDeclaration-1", () => {
     let res;
     let inter = new Interpreter({
@@ -161,4 +200,28 @@ try{
 }
 `);
 	expect(res).toEqual(6);
+});
+
+
+test("ConstDeclaration-9", () => {
+    let res;
+    let inter = new Interpreter({
+        rt: (val)=>{res = val},
+        console,
+    }, {
+        ecmaVersion: 2015,
+    })
+	inter.evaluate( `
+try{
+    let res = 0;
+    for(const i in [1,2,3,4]){
+        const sum = +i
+        res += sum;
+    }
+    rt(res)
+}catch(e){
+    rt(1)
+}
+`);
+	expect(res).toEqual(0+1+2+3);
 });

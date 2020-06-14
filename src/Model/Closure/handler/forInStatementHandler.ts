@@ -12,18 +12,30 @@ export function forInStatementHandler(this: Interpreter, node: ESTree.ForInState
     // for( k in obj) or for(o.k in obj) ...
     let left = node.left;
     const rightClosure = this.createClosure(node.right);
+    let getBodyClosure = () => {
+        if(node.body.type == 'BlockStatement'){
+            // node.body是个blockStatement，这里我们就不多此一举再去检测块作用域了。
+            return {
+                needBlock: null,
+                closure: this.createClosure(node.body)
+            }
+        }else {
+            this.blockDeclareStart()
+            let closure = this.createClosure(node.body)
+            let bodyLex = this.blockDeclareEnd()
+            return {
+                needBlock: bodyLex,
+                closure,
+            }
+        }
+    }
 
     // for(let k in obj) {...}
     let initClosure;
     let initLexDecl;
-    let bodyClosure: BaseClosure;
-    let bodyLexDecl;
     if (node.left.type === "VariableDeclaration") {
         this.blockDeclareStart()
         initClosure = this.createClosure(node.left)
-        this.blockDeclareStart()
-        bodyClosure = this.createClosure(node.body);
-        bodyLexDecl = this.blockDeclareEnd()
         initLexDecl = this.blockDeclareEnd()
         if(!initLexDecl){
             // 初始化参数是var，直接初始化即可
@@ -36,9 +48,6 @@ export function forInStatementHandler(this: Interpreter, node: ESTree.ForInState
         // for( k in obj)
         left = node.left.declarations[0].id;
     }else{
-        this.blockDeclareStart()
-        bodyClosure = this.createClosure(node.body);
-        bodyLexDecl = this.blockDeclareEnd()
     }
     // for-in执行流程的优化，请查看 https://github.com/IAIAE/estime/issues/1
     return pNode => {
@@ -95,18 +104,19 @@ export function forInStatementHandler(this: Interpreter, node: ESTree.ForInState
                 })();
             }
 
+            let bodyClosure = getBodyClosure()
             let bodyPrev: Scope
             let bodyScope: Scope
             // 对于for循环，每次执行body都需要绑定新的scope，这么来说确实效率会慢很多
-            if(bodyLexDecl){
+            if(bodyClosure.needBlock){
                 bodyScope = createScope(this.getCurrentScope(), 'BScope(forin-body)', 'block')
-                bodyScope.lexDeclared = bodyLexDecl
+                bodyScope.lexDeclared = bodyClosure.needBlock
                 bodyPrev = this.entryBlockScope(bodyScope)
             }
             // save last value
-            const ret = this.setValue(bodyClosure());
+            const ret = this.setValue(bodyClosure.closure());
             // 恢复
-            if(bodyLexDecl){
+            if(bodyClosure.needBlock){
                 this.setCurrentScope(bodyPrev!);
             }
             // notice: never return Break or Continue!
