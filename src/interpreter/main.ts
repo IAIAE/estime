@@ -61,8 +61,11 @@ interface CollectDeclarations {
  * 词法环境
  */
 type LexContext = {
-	[key: string]: true
-}[]
+	[key: string]: {
+		kind: 'const' | 'let'
+		init: boolean
+	}
+}
 
 type Context = {
 	[prop: string]: any;
@@ -300,7 +303,7 @@ export class Interpreter extends ClosureHandler {
 	protected collectDeclVars: CollectDeclarations = Object.create(null);
 	protected collectDeclFuncs: CollectDeclarations = Object.create(null);
 	// 编译时存放块级作用域的层级结构的声明，用于判断var声明时候是否非法（var的申明可以覆盖var，但是不能覆盖let等块级声明）
-	protected collectDeclLex: LexContext = []
+	protected collectDeclLex: LexContext[] = []
 	protected isVarDeclMode: boolean = false;
 
 	protected lastExecNode: Node | null = null;
@@ -381,15 +384,18 @@ export class Interpreter extends ClosureHandler {
 	/**
 	 * 包含块级作用域的语句声明之后执行，退栈，获取该块作用域声明的let/const变量
 	 */
-	protected blockDeclareEnd(){
+	protected blockDeclareEnd():LexContext|null{
 		// 准备块级作用域初始化必要参数
 		let lexDeclInThisBlock = this.collectDeclLex.pop()
-		let lexDeclared:{[key:string]: boolean}|null;
+		let lexDeclared: LexContext | null;
 		let lexNames = Object.getOwnPropertyNames(lexDeclInThisBlock)
 		if(lexNames.length){
 			lexDeclared = Object.create(null)
 			lexNames.forEach(key=>{
-				lexDeclared![key] = false
+				lexDeclared![key] = {
+					init: false,
+					kind: lexDeclInThisBlock![key].kind
+				}
 			})
 		}else {
 			// 说明没有词法变量，那就不用新建作用域了
@@ -822,6 +828,42 @@ export class Interpreter extends ClosureHandler {
 			: this.createObjectKeyGetter(node.property);
 	}
 
+	/**
+	 * 如果一个变量作为左值调用，用这个Getter，主要是判断了const
+	 * 不是作为左值调用，用createObjectGetter即可
+	 * @param node
+	 */
+	protected createLeftObjectGetter(node: ESTree.Expression | ESTree.Pattern):Getter{
+		switch(node.type){
+			case 'Identifier':
+				return () => {
+					let name = node.name
+					let scope = this.getScopeFromName(name, this.getCurrentScope(), true)
+					if(scope.lexDeclared && scope.lexDeclared[name] && scope.lexDeclared[name].kind == 'const'){
+						if(scope.lexDeclared[name].init === false){
+							scope.lexDeclared[name].init = true
+						}else{
+							// console.info('node ====> ', node, scope)
+							throw this.createInternalThrowError(
+								Messages.ConstChangeError,
+								name,
+								node
+							)
+						}
+					}
+					return scope.data
+				}
+			case "MemberExpression":
+				return this.createClosure(node.object);
+			default:
+				throw this.createInternalThrowError(
+					Messages.AssignmentTypeSyntaxError,
+					node.type,
+					node
+				);
+		}
+	}
+
 	// for UnaryExpression UpdateExpression AssignmentExpression
 	protected createObjectGetter(node: ESTree.Expression | ESTree.Pattern): Getter {
 		switch (node.type) {
@@ -923,30 +965,37 @@ export class Interpreter extends ClosureHandler {
 	 * @param name
 	 * @param startScope
 	 */
-	protected getScopeFromName(name: string, startScope: Scope) {
+	protected getScopeFromName(name: string, startScope: Scope, constInit?: true) {
 		let scope: Scope | null = startScope;
 
 		do {
 			if(scope.type == 'block'){
-				if(scope.lexDeclared[name] === false){
-					throw this.createInternalThrowError(
-						Messages.LetVariableUseBeforeInitReferenceError,
-						name,
-					);
-				}else if(scope.lexDeclared[name] === true){
-					return scope
-				}else{
+				if(!scope.lexDeclared[name]){
 					// 按理说，一个blockscope上的所有变量都标记在lexDeclared中，也有例外情况，
 					// 比如catch(e){}中，变量e会零时插入，且lexDeclared上也不会有标记
 					if(name in scope.data){
 						return scope
 					}
-					// 这个变量不在该作用域，向上
+					// 否则向上找
+				}else{
+					if(scope.lexDeclared[name].init === false){
+						if(constInit && scope.lexDeclared[name].kind == 'const'){
+							// const变量初始化的时候这个校验位还没有置为true，放行
+							return scope
+						}
+						throw this.createInternalThrowError(
+							Messages.LetVariableUseBeforeInitReferenceError,
+							name,
+						);
+					}else if(scope.lexDeclared[name].init === true){
+						return scope
+					}
+					// 否则向上找
 				}
 			}else{
 				// function scope
 				// 函数级别的作用域也可能有lexDeclared
-				if(scope.lexDeclared && scope.lexDeclared[name] === false){
+				if(scope.lexDeclared && scope.lexDeclared[name] && scope.lexDeclared[name].init === false){
 					throw this.createInternalThrowError(
 						Messages.LetVariableUseBeforeInitReferenceError,
 						name
@@ -956,6 +1005,7 @@ export class Interpreter extends ClosureHandler {
 					//if (hasOwnProperty.call(scope.data, name)) {
 					return scope;
 				}
+				// 否则向上找
 			}
 		} while ((scope = scope.parent));
 

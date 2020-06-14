@@ -24,6 +24,8 @@ interface Messages {
 	IsNotConstructor: MessageItem;
 	LetVariableUseBeforeInitReferenceError: MessageItem;
 	RedeclareBlockScopeVariableError: MessageItem;
+	ConstNotInitError: MessageItem;
+	ConstChangeError: MessageItem;
 }
 
 export type MessageItem = [
@@ -62,5 +64,7 @@ export const Messages: Messages = {
 	IsNotConstructor: [2003, "%0 is not a constructor", ThrowTypeError],
 	LetVariableUseBeforeInitReferenceError: [2004, 'Cannot access \'%0\' before initialization', ThrowReferenceError],
 	RedeclareBlockScopeVariableError: [2005, 'Cannot redeclare block-scoped variable \'%0\'', ThrowReferenceError],
+	ConstNotInitError: [2006, 'const \'%0\' declarations must be initialized.', InterruptThrowError],
+	ConstChangeError: [2007, 'Cannot assign to \'%0\' because it is a constant.', ThrowReferenceError],
 
 };

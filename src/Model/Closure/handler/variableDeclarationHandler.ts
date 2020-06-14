@@ -21,16 +21,25 @@ export function variableDeclarationHandler(this: Interpreter, node: ESTree.Varia
              * Cannot redeclare block-scoped variable 'xxx'
              */
             if(this.collectDeclLex.some(_=>_[variableName]) ){
-                this.createInternalThrowError(Messages.RedeclareBlockScopeVariableError, node.type, node);
+                throw this.createInternalThrowError(Messages.RedeclareBlockScopeVariableError, node.type, node);
             }
             // 如果是var，声明提升
             this.varDeclaration(variableName);
         } else {
-            // 如果是let、const等声明，变量名加入一个特殊的队列collectDeclLex的栈顶hash
+            // 如果是let\const声明，变量名加入一个特殊的队列collectDeclLex的栈顶hash
             let stackTop = this.collectDeclLex[this.collectDeclLex.length - 1]
-            stackTop[variableName] = true
+            // collectDeclLex主要是在编译阶段收集块变量用，如果在执行阶段动态去声明一个变量，那collectDeclLex将是空数组，所以判断一下
+            stackTop && (stackTop[variableName] = {
+                init: false,
+                kind: node.kind
+            })
             blockVariables.push(variableName)
         }
+        // 一些情形，低于const的声明不会有init，比如for(const i in arr){}
+        // 我们这里不做强校验，主动声明的const必须初始化，acorn在生成ast之前就有校验，我们信任acorn吧。另外，即使这里不初始化，之后对const的赋值也会报错，所以不会产生太大影响。
+        // if(node.kind == 'const' && !decl.init){
+        //     throw this.createInternalThrowError(Messages.ConstNotInitError, variableName, node)
+        // }
         if (decl.init) {
             assignments.push({
                 type: "AssignmentExpression",
@@ -56,7 +65,13 @@ export function variableDeclarationHandler(this: Interpreter, node: ESTree.Varia
                 let scope = this.getCurrentScope()
                 // 确认初始化块级变量
                 blockVariables.forEach(name=>{
-                    scope.lexDeclared[name] = true
+                    if(scope.lexDeclared[name].kind === 'const'){
+                        // 对于const变量，我们只在复制运行的时候将init设为true，
+                        // init设为true后，之后对该变量的所有左值访问都将报错
+                    }else if(scope.lexDeclared[name].kind === 'let'){
+                        // 对于let变量，我们在这里讲init设为true就好，时机不太影响
+                        scope.lexDeclared[name].init = true
+                    }
                 })
             }
             const oldValue = this.isVarDeclMode;

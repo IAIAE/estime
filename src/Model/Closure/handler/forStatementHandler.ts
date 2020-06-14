@@ -1,11 +1,11 @@
 
 import { Node, ESTree } from "../../Node";
-import {BaseClosure, } from '../../Closure'
-import {Messages} from '../../Message'
-import {Interpreter} from '../../../interpreter/main'
-import {noop} from '../../../util'
-import {EmptyStatementReturn, Continue, Break,} from '../../Symbols'
-import {Return, BreakLabel, ContinueLabel} from '../../TokenClass'
+import { BaseClosure, } from '../../Closure'
+import { Messages } from '../../Message'
+import { Interpreter } from '../../../interpreter/main'
+import { noop } from '../../../util'
+import { EmptyStatementReturn, Continue, Break, } from '../../Symbols'
+import { Return, BreakLabel, ContinueLabel } from '../../TokenClass'
 import Scope, { createScope } from "../../Scope";
 
 
@@ -18,27 +18,32 @@ export function forStatementHandler(
     let testClosure = node.test ? this.createClosure(node.test) : () => true;
     let updateClosure = noop;
     let initLexDeclared: any;
-    let bodyLexDeclared: any
-    let bodyClosure: BaseClosure;
+    let getBodyClosure = () => {
+        if(node.body.type == 'BlockStatement'){
+            // node.body是个blockStatement，这里我们就不多此一举再去检测块作用域了。
+            return {
+                needBlock: null,
+                closure: this.createClosure(node.body)
+            }
+        }else {
+            this.blockDeclareStart()
+            let closure = this.createClosure(node.body)
+            let bodyLex = this.blockDeclareEnd()
+            return {
+                needBlock: bodyLex,
+                closure,
+            }
+        }
+    }
     if (node.type === "ForStatement") {
-        if(node.init){
+        if (node.init) {
             this.blockDeclareStart()
             initClosure = this.createClosure(node.init)
-            this.blockDeclareStart()
-            bodyClosure = this.createClosure(node.body);
-            bodyLexDeclared = this.blockDeclareEnd()
             initLexDeclared = this.blockDeclareEnd()
-        }else{
-            this.blockDeclareStart()
-            bodyClosure = this.createClosure(node.body);
-            bodyLexDeclared = this.blockDeclareEnd()
         }
         updateClosure = node.update ? this.createClosure(node.update) : noop;
-    }else{
+    } else {
         // while, do-while
-        this.blockDeclareStart()
-        bodyClosure = this.createClosure(node.body);
-        bodyLexDeclared = this.blockDeclareEnd()
     }
 
     return pNode => {
@@ -51,7 +56,7 @@ export function forStatementHandler(
         }
         let prevScope: Scope;
         let newScope: Scope;
-        if(initLexDeclared){
+        if (initLexDeclared) {
             newScope = createScope(this.getCurrentScope(), `BScope(for-let)`, "block")
             newScope.lexDeclared = initLexDeclared
             prevScope = this.entryBlockScope(newScope)
@@ -59,18 +64,18 @@ export function forStatementHandler(
         for (initClosure(); shouldInitExec || testClosure(); updateClosure()) {
             shouldInitExec = false;
 
+            let bodyClosure = getBodyClosure()
             let bodyPrev: Scope
             let bodyScope: Scope
-            // 对于for循环，每次执行body都需要绑定新的scope，这么来说确实效率会慢很多
-            if(bodyLexDeclared){
-                bodyScope = createScope(this.getCurrentScope(), 'BScope(for-body)', 'block')
-                bodyScope.lexDeclared = bodyLexDeclared
+            if(bodyClosure.needBlock){
+                bodyScope = createScope(this.getCurrentScope(), `BScope(for-body)`, "block")
+                bodyScope.lexDeclared = bodyClosure.needBlock
                 bodyPrev = this.entryBlockScope(bodyScope)
             }
             // save last value
-            const ret = this.setValue(bodyClosure());
+            const ret = this.setValue(bodyClosure.closure());
             // 恢复作用域
-            if(bodyLexDeclared){
+            if (bodyClosure.needBlock) {
                 this.setCurrentScope(bodyPrev!);
             }
             // notice: never return Break or Continue!
@@ -95,7 +100,7 @@ export function forStatementHandler(
                 break;
             }
         }
-        if(initLexDeclared){
+        if (initLexDeclared) {
             this.setCurrentScope(prevScope!)
         }
         return result;

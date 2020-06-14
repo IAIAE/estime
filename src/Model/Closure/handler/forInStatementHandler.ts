@@ -40,7 +40,7 @@ export function forInStatementHandler(this: Interpreter, node: ESTree.ForInState
         bodyClosure = this.createClosure(node.body);
         bodyLexDecl = this.blockDeclareEnd()
     }
-
+    // for-in执行流程的优化，请查看 https://github.com/IAIAE/estime/issues/1
     return pNode => {
         let labelName: string | undefined;
         let result: any = EmptyStatementReturn;
@@ -52,35 +52,48 @@ export function forInStatementHandler(this: Interpreter, node: ESTree.ForInState
 
         let prevScope: Scope;
         let newScope: Scope;
-        if(initClosure){
+        if(initLexDecl){
             newScope = createScope(this.getCurrentScope(), `BScope(forin-let)`, "block")
             newScope.lexDeclared = initLexDecl
             prevScope = this.entryBlockScope(newScope)
-            // 初始化变量
-            initClosure()
-            // init一下块变量，以免之后引用显示未初始化
-            Object.getOwnPropertyNames(newScope.lexDeclared).forEach(name=>{
-                newScope.lexDeclared[name] = true
-            })
         }
-
 
         const data = rightClosure();
 
         for (x in data) {
-            // assign left to scope
-            // k = x
-            // o.k = x
-            // 对于迭代变量的赋值应该在bodyScope之外
-            this.assignmentExpressionHandler({
-                type: "AssignmentExpression",
-                operator: "=",
-                left: left as ESTree.Pattern,
-                right: {
-                    type: "Literal",
-                    value: x,
-                },
-            })();
+
+            if(initLexDecl){
+                // 将所有声明变量的初始化改为false，重新赋值
+                Object.getOwnPropertyNames(newScope!.lexDeclared).forEach(name=>{
+                    newScope.lexDeclared[name].init = false
+                })
+                this.variableDeclarationHandler({
+                    type: "VariableDeclaration",
+                    kind: (node.left as ESTree.VariableDeclaration).kind,
+                    declarations: [{
+                        type: "VariableDeclarator",
+                        id: (node.left as ESTree.VariableDeclaration).declarations[0].id,
+                        init: {
+                            type: "Literal",
+                            value: x,
+                        }
+                    }]
+                })();
+            }else{
+                // assign left to scope
+                // k = x
+                // o.k = x
+                // 对于迭代变量的赋值应该在bodyScope之外
+                this.assignmentExpressionHandler({
+                    type: "AssignmentExpression",
+                    operator: "=",
+                    left: left as ESTree.Pattern,
+                    right: {
+                        type: "Literal",
+                        value: x,
+                    },
+                })();
+            }
 
             let bodyPrev: Scope
             let bodyScope: Scope
@@ -119,7 +132,7 @@ export function forInStatementHandler(this: Interpreter, node: ESTree.ForInState
             }
         }
         // 恢复
-        if(initClosure){
+        if(initLexDecl){
             this.setCurrentScope(prevScope!)
         }
         return result;

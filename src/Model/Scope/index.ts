@@ -7,7 +7,10 @@ export default class Scope {
 	type: ScopeType
 	labelStack: string[];
 	lexDeclared: {
-		[key: string]: boolean
+		[key: string]: {
+			kind: 'const' | 'let'
+			init: boolean
+		}
 	}
 	constructor(data: ScopeData, parent: Scope | null = null, name?: string | Symbol, type: ScopeType = 'function') {
 		this.name = name;

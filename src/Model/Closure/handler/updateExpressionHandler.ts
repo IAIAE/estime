@@ -6,7 +6,7 @@ import {Interpreter} from '../../../interpreter/main'
 
 // ++a --a
 export function updateExpressionHandler(this: Interpreter, node: ESTree.UpdateExpression): BaseClosure {
-    const objectGetter = this.createObjectGetter(node.argument);
+    const objectGetter = this.createLeftObjectGetter(node.argument);
     const nameGetter = this.createNameGetter(node.argument);
     return () => {
         const obj = objectGetter();

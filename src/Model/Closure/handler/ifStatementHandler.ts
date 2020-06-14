@@ -23,7 +23,7 @@ export function ifStatementHandler(
         let prevScope:Scope;
         let newScope: Scope;
         if(lexDeclared){
-            newScope = createScope(this.getCurrentScope(), `BScope`, "block")
+            newScope = createScope(this.getCurrentScope(), `BScope(if)`, "block")
             newScope.lexDeclared = lexDeclared
             prevScope = this.entryBlockScope(newScope)
         }
