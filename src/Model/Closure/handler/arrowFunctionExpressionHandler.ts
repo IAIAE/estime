@@ -9,13 +9,10 @@ import { defineFunctionName } from '../../../util'
 
 // var f = function() {...}
 // 在es5的标准下，没有块级作用域，只会在function下会创建一个新的scope。所以这里的操作和evaluate的感觉差不多
-export function functionExpressionHandler(
+export function arrowFunctionExpressionHandler(
     this: Interpreter,
-    node:
-        | (ESTree.FunctionExpression & { start?: number; end?: number })
-        | (ESTree.FunctionDeclaration & { start?: number; end?: number })
+    node: (ESTree.ArrowFunctionExpression & { start?: number; end?: number })
 ): BaseClosure {
-    const self = this
     const source = this.source;
     const oldDeclVars = this.collectDeclVars;
     const oldDeclFuncs = this.collectDeclFuncs;
@@ -25,7 +22,7 @@ export function functionExpressionHandler(
     this.collectDeclVars = Object.create(null);
     this.collectDeclFuncs = Object.create(null);
     this.collectDeclLex = [];
-    const name = node.id ? node.id.name : ""; /**anonymous*/
+    const name = 'anonymous_arrow_func'; /**anonymous*/
     const paramLength = node.params.length;
 
     const paramsGetter = node.params.map(param => this.createParamNameGetter(param));
@@ -46,70 +43,62 @@ export function functionExpressionHandler(
     // 创建一个新的scope，然后返回一个函数，该函数会在新建的scope执行
     return () => {
         // bind current scope
-        // 注意一个函数执行时候的作用域，并不是真正调用时候的作用域，而是声明时候代码所在地点的作用域
-        const runtimeScope = self.getCurrentScope();
+        // 箭头函数的scope和context都是在函数声明的时候就确定了。
+        const runtimeScope = this.getCurrentScope();
+        const ctx = this.getCurrentContext();
 
-        const func = function (...args: any[]) {
-            // @ts-ignore
-            self.callStack.push(`${name}`);
+        const func = (...args: any[]) => {
+            this.callStack.push(`${name}`);
 
-            // @ts-ignore
-            const prevScope = self.getCurrentScope();
+            const prevScope = this.getCurrentScope();
             // 函数执行时，创建新的scope，然后下一行将程序的运行指针指向新的scope
             const currentScope = createScope(runtimeScope, `FunctionScope(${name})`);
             currentScope.lexDeclared = lexDecls!
-            // @ts-ignore
-            self.setCurrentScope(currentScope);
+            this.setCurrentScope(currentScope);
             // 将准备好的变量和函数声明赋值到新的scope
-            // @ts-ignore
-            self.addDeclarationsToScope(declVars, declFuncs, currentScope);
+            this.addDeclarationsToScope(declVars, declFuncs, currentScope);
 
             // var t = function(){ typeof t } // function
             // t = function(){ typeof t } // function
             // z = function tx(){ typeof tx } // function
             // but
             // d = { say: function(){ typeof say } } // undefined
-            if (name) {
-                currentScope.data[name] = func;
-            }
-            // init arguments var
-            currentScope.data["arguments"] = arguments;
+
+            // arrow-function has no 'arguments'
+            // currentScope.data["arguments"] = arguments;
 
             paramsGetter.forEach((getter, i) => {
                 currentScope.data[getter()] = args[i];
             });
 
             // init this
-            // @ts-ignore
-            const prevContext = self.getCurrentContext();
+            const prevContext = this.getCurrentContext();
             //for ThisExpression
-            // @ts-ignore
-            self.setCurrentContext(this);
+            this.setCurrentContext(ctx);
 
             // 执行
             const result = bodyClosure();
 
             // 恢复
-            // @ts-ignore
-            self.setCurrentContext(prevContext);
-            // @ts-ignore
-            self.setCurrentScope(prevScope);
-            // @ts-ignore
-            self.callStack.pop();
+            this.setCurrentContext(prevContext);
+            this.setCurrentScope(prevScope);
+            this.callStack.pop();
 
             if (result instanceof Return) {
                 return result.value;
             }
         };
 
+        // todo: let foo = ()=>{}, foo.name==='foo'
         defineFunctionName(func, name);
 
-        Object.defineProperty(func, "length", {
-            value: paramLength,
-            writable: false,
-            enumerable: false,
-            configurable: true,
-        });
+        // arrow-func has no .length
+        // Object.defineProperty(func, "length", {
+        //     value: paramLength,
+        //     writable: false,
+        //     enumerable: false,
+        //     configurable: true,
+        // });
 
         Object.defineProperty(func, "toString", {
             value: () => {

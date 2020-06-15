@@ -52,6 +52,7 @@ export class ClosureHandler {
 	debuggerStatementHandler = handler.debuggerStatementHandler
 	catchClauseHandler = handler.catchClauseHandler
 	groupStatementHandler = handler.groupStatementHandler
+	arrowFunctionExpressionHandler = handler.arrowFunctionExpressionHandler
 
     protected getClosure(this: Interpreter, node: Node): BaseClosure|null {
 		let closure: BaseClosure|null = null;
@@ -101,6 +102,9 @@ export class ClosureHandler {
 				break;
 			case "FunctionDeclaration":
 				closure = this.functionDeclarationHandler(node);
+				break;
+			case 'ArrowFunctionExpression':
+				closure = this.arrowFunctionExpressionHandler(node);
 				break;
 			case "VariableDeclaration":
 				closure = this.variableDeclarationHandler(node);

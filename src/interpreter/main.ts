@@ -617,6 +617,10 @@ export class Interpreter extends ClosureHandler {
 		return obj[key];
 	}
 
+
+	/**
+	 * @param node
+	 */
 	protected createCallFunctionGetter(node: Node & { start?: number; end?: number }) {
 		switch (node.type) {
 			case "MemberExpression":
@@ -937,6 +941,7 @@ export class Interpreter extends ClosureHandler {
 
 		for (let key in declFuncs) {
 			const value = declFuncs[key];
+			// 一个函数执行时候的scope在这个时候就已经确定了
 			scopeData[key] = value ? value() : value;
 		}
 

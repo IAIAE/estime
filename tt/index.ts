@@ -20,23 +20,15 @@ evt.on('data', val=>{
 
 
 
-// let res = inter.evaluate(`
-// let a = key
-// const key = (123);
-// const key = (key, 123);
-// key = 456;
-// `)
-// todo: for-in 设置const时，不要报错
 let res = inter.evaluate(`
-try{
-    let res = 0;
-    for(let i = 0; i<4;i++){
-        const sum = i
-        res += sum;
+function t(){
+
+    let test = () =>{
+        console.info('this is ', this)
     }
-}catch(e){
-    console.info(e.message)
+    test.bind('hello ')()
 }
+t.call({name: 123})
 `)
 
 console.info('res is ', res)
