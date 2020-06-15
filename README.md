@@ -6,7 +6,7 @@ under developing....
 
 基于 TypeScript 编写的 JavaScript 解释器。初版fork于[eval5](https://github.com/bplok20010/eval5)，目标是原生支持es2015语法和JSX且修改bug，持续开发中.....，进度请查看最后的[todoList](#todoList)
 
-新开一个repo的原因是改得太多了。很难再去提mq，且原作者貌似不太回issue。
+新开一个repo的原因是改得太多了。很难再去提mq
 
 目前处于hot开发中....每天估计都会有更新，不稳定。请先不要使用
 
