@@ -304,7 +304,7 @@ es2015\es2017等等申明，个人感觉是非严格的es规范支持声明。es
   - [x] context绑定
 - [ ] 解构
   - [x] 对象解构
-  - [ ] 数组解构
+  - [x] 数组解构
   - [ ] 函数实参解构
 - [ ] Rest element
   - [x] ObjectPattern

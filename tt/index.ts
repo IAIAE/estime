@@ -22,8 +22,9 @@ evt.on('data', val=>{
 
 let res = inter.evaluate(`
 function t(){
-    const [first, ...rest] = 1;
-    console.info('name is ', first, rest)
+    let arr = [1,2,3,4]
+    let t = [,,123, ...1, ,,456]
+    console.info('t is ', t)
 }
 try{
     t.call({name: 123})
