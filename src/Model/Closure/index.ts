@@ -53,6 +53,7 @@ export class ClosureHandler {
 	catchClauseHandler = handler.catchClauseHandler
 	groupStatementHandler = handler.groupStatementHandler
 	arrowFunctionExpressionHandler = handler.arrowFunctionExpressionHandler
+	objectPatternAssignHandler = handler.objectPatternAssignHandler
 
     protected getClosure(this: Interpreter, node: Node): BaseClosure|null {
 		let closure: BaseClosure|null = null;
@@ -117,6 +118,11 @@ export class ClosureHandler {
 			// @ts-ignore
 			case "GroupStatement":
 				closure = this.groupStatementHandler(node)
+				break;
+			// let {name, ...rest} = obj的赋值，写成了一个handler方便一点，要拆解开的话rest不太好实现
+			// @ts-ignore
+			case "ObjectPatternAssignExpression":
+				closure = this.objectPatternAssignHandler(node)
 				break;
 			case "ExpressionStatement":
 				closure = this.expressionStatementHandler(node);

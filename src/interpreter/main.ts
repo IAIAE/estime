@@ -278,7 +278,8 @@ export class Interpreter extends ClosureHandler {
 	static readonly version: string = version;
 	static readonly eval = internalEval;
 	static readonly Function = internalFunction;
-	static ecmaVersion: ECMA_VERSION = 5;
+	// 默认切换到2018，支持解构
+	static ecmaVersion: ECMA_VERSION = 2018;
 	// alert.call(globalContextInFunction, 1);
 	// fix: alert.call({}, 1); // Illegal invocation
 	// function func(){

@@ -26,6 +26,9 @@ interface Messages {
 	RedeclareBlockScopeVariableError: MessageItem;
 	ConstNotInitError: MessageItem;
 	ConstChangeError: MessageItem;
+	UnknownVariableDeclTypeError: MessageItem;
+	SpreadPatternVariableNoInit: MessageItem;
+	NormalError: MessageItem;
 }
 
 export type MessageItem = [
@@ -66,5 +69,9 @@ export const Messages: Messages = {
 	RedeclareBlockScopeVariableError: [2005, 'Cannot redeclare block-scoped variable \'%0\'', ThrowReferenceError],
 	ConstNotInitError: [2006, 'const \'%0\' declarations must be initialized.', InterruptThrowError],
 	ConstChangeError: [2007, 'Cannot assign to \'%0\' because it is a constant.', ThrowReferenceError],
+	UnknownVariableDeclTypeError: [2008, 'Unknown Vaiable Declarator type \'%0\'.', InterruptThrowReferenceError],
+	SpreadPatternVariableNoInit: [2009, 'no init in Rest Pattern Variable.', InterruptThrowReferenceError],
+	NormalError: [2010, '%0', ThrowReferenceError],
+
 
 };

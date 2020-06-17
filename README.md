@@ -4,7 +4,7 @@ estime = ecmascript + runtime, in javascipt(es5) environment
 under developing....
 功能开发中，如果要使用，请使用初版[eval5](https://github.com/bplok20010/eval5)
 
-基于 TypeScript 编写的 JavaScript 解释器。初版fork于[eval5](https://github.com/bplok20010/eval5)，目标是原生支持es2015语法和JSX且修改bug，持续开发中.....，进度请查看最后的[todoList](#todoList)
+基于 TypeScript 编写的 JavaScript 解释器。初版fork于[eval5](https://github.com/bplok20010/eval5)，目标是原生支持es2017(非严格)语法和JSX且修改bug，持续开发中.....，进度请查看最后的[todoList](#todoList)
 
 新开一个repo的原因是改得太多了。很难再去提mq
 
@@ -289,7 +289,9 @@ MIT
 
 
 # todoList
-es2015的相关特性可以看[这里](https://babeljs.io/docs/en/learn/)，并不一定全部实现。但常用的都会实现的。
+es2015\es2017等等申明，个人感觉是非严格的es规范支持声明。es的规范会经过不同stage的提案状态，有些特性还在stage-1等就已经放出来开始广泛使用了。所以对于es2015，你会看到有“对象解构”，但是实际上在2015年的时候，它还不是stage-4。我看acorn.js在es2018才支持解构，但是babel的文档上，es2015就已经包含解构了，这样的差异还真不好细究清楚，且深究也没有意义。所以，我没有局限在2015还是2017上，关注的是特性，需要支持的特性下面的todolist都会列出来。
+
+相关特性可以看[这里](https://babeljs.io/docs/en/learn/)，并不一定全部实现。但常用的都会实现的。
 
 - [x] 块级作用域
   - [x] let
@@ -301,7 +303,13 @@ es2015的相关特性可以看[这里](https://babeljs.io/docs/en/learn/)，并�
   - [x] 基础执行支持
   - [x] context绑定
 - [ ] 解构
-- [ ] 函数参数解构
+  - [x] 对象解构
+  - [ ] 数组解构
+  - [ ] 函数实参解构
+- [ ] Rest element
+  - [x] ObjectPattern
+  - [x] ArrayPattern
+  - [ ] 函数形参rest
 - [ ] Map + Set + WeakMap + WeakSet
   - [ ] Map
   - [ ] Set
