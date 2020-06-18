@@ -2,7 +2,7 @@ import { Node, ESTree } from "../../Node";
 import {BaseClosure, } from '../../Closure'
 import {Messages} from '../../Message'
 import {Interpreter} from '../../../interpreter/main'
-
+import {isSymbol} from '../../Symbols'
 
 // typeof a !a()
 export function unaryExpressionHandler(this: Interpreter, node: ESTree.UnaryExpression): BaseClosure {
@@ -51,6 +51,9 @@ export function unaryExpressionHandler(this: Interpreter, node: ESTree.UnaryExpr
                     case "void":
                         return void value;
                     case "typeof":
+                        if(isSymbol(value)){
+                            return 'symbol'
+                        }
                         return typeof value;
                     default:
                         throw this.createInternalThrowError(

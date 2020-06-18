@@ -108,11 +108,11 @@ test("eval basic-2", () => {
 	});
 	const a = evaluate(
 		`
-    var a = 100;    
+    var a = 100;
     function test(){
         var b = 200;
         return eval('a+b+this');
-    } 
+    }
     test.call(300);
     `,
 		ctx
@@ -139,7 +139,7 @@ test("Function basic -1", () => {
 	const a = evaluate(
 		`
     var func = new Function('a', 'b', 'return a+b');
-    
+
     [func(100,200), func];
     `,
 		ctx
@@ -153,7 +153,7 @@ test("Function basic -2", () => {
 	const a = evaluate(
 		`
     var func = Function('a', 'b', 'return a+b');
-    
+
     [func(100,200), func];
     `,
 		ctx
@@ -276,7 +276,7 @@ test("replace super scope prop", () => {
 test("replace super scope prop", () => {
 	const ctx = Object.create(null);
 	evaluate(`d = 1`, ctx);
-	expect(ctx).toEqual({ d: 1 });
+	expect(ctx.d).toEqual(1);
 });
 
 test("call Interpreter.eval", () => {

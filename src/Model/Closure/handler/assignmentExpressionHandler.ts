@@ -3,6 +3,7 @@ import { Node, ESTree } from "../../Node";
 import {BaseClosure, } from '../../Closure'
 import {Messages} from '../../Message'
 import {Interpreter} from '../../../interpreter/main'
+import { isSymbol, storeKey } from "../../Symbols";
 
 // a=1 a+=2
 export function assignmentExpressionHandler(this: Interpreter, node: ESTree.AssignmentExpression): BaseClosure {
@@ -27,6 +28,10 @@ export function assignmentExpressionHandler(this: Interpreter, node: ESTree.Assi
         // dataGetter执行时，判断如果是const且已经初始化，会报错
         const data = dataGetter();
         const name = nameGetter();
+        let realName;
+        if(isSymbol(name)){
+            realName = storeKey(name)
+        }
         const rightValue = rightValueGetter();
         if (node.operator !== "=") {
             // if a is undefined
@@ -36,7 +41,17 @@ export function assignmentExpressionHandler(this: Interpreter, node: ESTree.Assi
 
         switch (node.operator) {
             case "=":
-                return (data[name] = rightValue);
+                if(isSymbol(name)){
+                    Object.defineProperty(data, realName, {
+                        value: rightValue,
+                        writable: true,
+                        enumerable: false,
+                        configurable: false,
+                    });
+                    return rightValue
+                }else{
+                    return (data[name] = rightValue);
+                }
             case "+=":
                 return (data[name] += rightValue);
             case "-=":

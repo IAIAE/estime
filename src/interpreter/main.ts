@@ -9,7 +9,7 @@ import {
 } from "../Model/Message";
 import { Node, ESTree } from "../Model/Node";
 import {ClosureHandler, BaseClosure, CaseItem, ReturnStringClosure, SwitchCaseClosure} from '../Model/Closure'
-import {Break, Continue, DefaultCase, EmptyStatementReturn, GlobalScopeName, RootScopeName, SuperScopeName, WithScopeName} from '../Model/Symbols'
+import {Break, Continue, DefaultCase, EmptyStatementReturn, GlobalScopeName, RootScopeName, SuperScopeName, WithScopeName, createSymbolFunc} from '../Model/Symbols'
 import {BreakLabel, ContinueLabel, Return} from '../Model/TokenClass'
 import {isFunction} from '../util'
 
@@ -357,6 +357,8 @@ export class Interpreter extends ClosureHandler {
 		}
 
 		this.globalScope = scope;
+		// 顶级作用域嵌入mock的Symbol方法。
+		this.globalScope.data['Symbol'] = createSymbolFunc()
 		this.currentScope = this.globalScope;
 		//init global context to this
 		this.globalContext = scope.data;

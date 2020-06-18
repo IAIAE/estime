@@ -21,9 +21,14 @@ evt.on('data', val=>{
 
 
 let res = inter.evaluate(`
-let arr = [1,2,3]
-let t = arr.reduce((seed, cur)=>seed+cur, 0)
-console.info('t ', t)
+let t = Symbol('t')
+let a = {name: 'hello'}
+a[t] = 123
+Object.keys(a).forEach(key=>{
+    console.info(key)
+})
+a[t] = 456
+console.info(a[t])
 `)
 
 console.info('res is ', res)

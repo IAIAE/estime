@@ -317,7 +317,8 @@ es2015\es2017等等申明，个人感觉是非严格的es规范支持声明。es
   - [ ] WeakSet
 - [ ] for-of
 - [ ] Template Strings
-- [ ] Symbols
+- [ ] Computed property
+- [x] Symbols
 - [ ] Promises
 - [ ] Generators
 - [ ] Math + Number + String + Object APIs
