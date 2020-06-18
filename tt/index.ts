@@ -21,16 +21,9 @@ evt.on('data', val=>{
 
 
 let res = inter.evaluate(`
-function t(){
-    let arr = [1,2,3,4]
-    let t = [,,123, ...1, ,,456]
-    console.info('t is ', t)
-}
-try{
-    t.call({name: 123})
-}catch(e){
-    console.info(e)
-}
+let arr = [1,2,3]
+let t = arr.reduce((seed, cur)=>seed+cur, 0)
+console.info('t ', t)
 `)
 
 console.info('res is ', res)

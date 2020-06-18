@@ -804,6 +804,8 @@ export class Interpreter extends ClosureHandler {
 	protected createParamNameGetter(node: ESTree.Pattern): ReturnStringClosure {
 		if (node.type === "Identifier") {
 			return () => node.name;
+		}else if(node.type === 'RestElement'){
+			return this.createParamNameGetter(node.argument)
 		} else {
 			throw this.createInternalThrowError(Messages.ParamTypeSyntaxError, node.type, node);
 		}

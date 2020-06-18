@@ -25,10 +25,20 @@ export function arrowFunctionExpressionHandler(
     const name = 'anonymous_arrow_func'; /**anonymous*/
     const paramLength = node.params.length;
 
-    const paramsGetter = node.params.map(param => this.createParamNameGetter(param));
+    const paramsGetter = node.params.map(param => ({
+        type: param.type,
+        closure: this.createParamNameGetter(param),
+    }));
     this.blockDeclareStart()
     // set scope
-    const bodyClosure = this.createClosure(node.body);
+    // @ts-ignore
+    const bodyClosure = this.createClosure(node.expression===true?{
+        type: 'GroupStatement',
+        body: [{
+            type: 'ReturnStatement',
+            argument: node.body,
+        }]
+    }:node.body);
     let lexDecls = this.blockDeclareEnd()
 
     // 这里是准备好的变量和函数声明提升
@@ -68,7 +78,11 @@ export function arrowFunctionExpressionHandler(
             // currentScope.data["arguments"] = arguments;
 
             paramsGetter.forEach((getter, i) => {
-                currentScope.data[getter()] = args[i];
+                if(getter.type === 'RestElement'){
+                    currentScope.data[getter.closure()] = args.slice(i)
+                }else{
+                    currentScope.data[getter.closure()] = args[i];
+                }
             });
 
             // init this
@@ -78,7 +92,6 @@ export function arrowFunctionExpressionHandler(
 
             // 执行
             const result = bodyClosure();
-
             // 恢复
             this.setCurrentContext(prevContext);
             this.setCurrentScope(prevScope);

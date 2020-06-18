@@ -26,9 +26,14 @@ export function functionExpressionHandler(
     this.collectDeclFuncs = Object.create(null);
     this.collectDeclLex = [];
     const name = node.id ? node.id.name : ""; /**anonymous*/
-    const paramLength = node.params.length;
 
-    const paramsGetter = node.params.map(param => this.createParamNameGetter(param));
+    // 可变参数不计入function.length
+    const paramLength = node.params.filter(_=>_.type!='RestElement').length;
+
+    const paramsGetter = node.params.map(param => ({
+        type: param.type,
+        closure: this.createParamNameGetter(param)
+    }));
     this.blockDeclareStart()
     // set scope
     const bodyClosure = this.createClosure(node.body);
@@ -76,7 +81,11 @@ export function functionExpressionHandler(
             currentScope.data["arguments"] = arguments;
 
             paramsGetter.forEach((getter, i) => {
-                currentScope.data[getter()] = args[i];
+                if(getter.type === 'RestElement'){
+                    currentScope.data[getter.closure()] = args.slice(i)
+                }else{
+                    currentScope.data[getter.closure()] = args[i];
+                }
             });
 
             // init this

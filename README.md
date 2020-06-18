@@ -302,14 +302,14 @@ es2015\es2017等等申明，个人感觉是非严格的es规范支持声明。es
 - [x] 箭头函数
   - [x] 基础执行支持
   - [x] context绑定
-- [ ] 解构
+- [x] 解构
   - [x] 对象解构
   - [x] 数组解构
-  - [ ] 函数实参解构
-- [ ] Rest element
+  - [x] 函数实参解构
+- [x] Rest element
   - [x] ObjectPattern
   - [x] ArrayPattern
-  - [ ] 函数形参rest
+  - [x] 函数形参rest
 - [ ] Map + Set + WeakMap + WeakSet
   - [ ] Map
   - [ ] Set

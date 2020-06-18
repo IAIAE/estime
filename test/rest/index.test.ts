@@ -152,3 +152,65 @@ rt(rest)
 `);
 	expect(res).toEqual([2,3,4])
 });
+
+test("Destructure-11", () => {
+    let res;
+    let inter = new Interpreter({
+        rt: (val)=>{res = val},
+        console,
+    })
+    inter.evaluate( `
+    function sum(first, ...rest){
+        return first + rest.reduce((seed, cu)=>seed+cu, 0)
+    }
+
+    rt(sum(1,2,3,4))
+`);
+	expect(res).toEqual(1+2+3+4)
+});
+
+
+test("Destructure-12", () => {
+    let res;
+    let inter = new Interpreter({
+        rt: (val)=>{res = val},
+        console,
+    })
+    inter.evaluate( `
+    function sum(...rest){
+        return rest.reduce((seed, cu)=>seed+cu, 0)
+    }
+
+    rt(sum())
+`);
+	expect(res).toEqual(0)
+});
+
+test("Destructure-13", () => {
+    let res;
+    let inter = new Interpreter({
+        rt: (val)=>{res = val},
+        console,
+    })
+    inter.evaluate( `
+    function sum(...rest){
+        let t = rest.reduce((seed, cu)=>seed+cu, 0)
+        return t
+    }
+    let t = sum(1,2,3)
+    rt(t)
+`);
+	expect(res).toEqual(1+2+3)
+});
+test("Destructure-14", () => {
+    let res;
+    let inter = new Interpreter({
+        rt: (val)=>{res = val},
+        console,
+    })
+    inter.evaluate( `
+    const sum = (...rest) => rest.reduce((seed, cu)=>seed+cu, 0)
+    rt(sum(1,2,3))
+`);
+	expect(res).toEqual(1+2+3)
+});

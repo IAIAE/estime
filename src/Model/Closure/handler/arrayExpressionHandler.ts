@@ -12,7 +12,7 @@ export function arrayExpressionHandler(this:Interpreter,  node: ESTree.ArrayExpr
         return {
             type: element.type,
             // @ts-ignore
-            closure: element.type == 'SpreadElement'?this.identifierHandler(element.argument):this.createClosure(element)
+            closure: element.type == 'SpreadElement'?this.createClosure(element.argument):this.createClosure(element)
         }
     });
     return () => {

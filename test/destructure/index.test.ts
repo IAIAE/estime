@@ -190,3 +190,65 @@ try{
 `);
 	expect(res).toEqual(0)
 });
+
+
+test("Destructure-10", () => {
+    let res;
+    let inter = new Interpreter({
+        rt: (val)=>{res = val},
+        console,
+    })
+    inter.evaluate( `
+    let t = [1,2, ...[1,2,3]];
+    rt(t)
+`);
+	expect(res).toEqual([1,2,1,2,3])
+});
+
+test("Destructure-11", () => {
+    let res;
+    let inter = new Interpreter({
+        rt: (val)=>{res = val},
+        console,
+    })
+    inter.evaluate( `
+    function test(one, two, three){
+        return one + two + three
+    }
+    rt(test(1, ...[2,3]))
+`);
+	expect(res).toEqual(1+2+3)
+});
+
+
+test("Destructure-12", () => {
+    let res;
+    let inter = new Interpreter({
+        rt: (val)=>{res = val},
+        console,
+    })
+    inter.evaluate( `
+    function test(one, two, three){
+        return one + two + three
+    }
+    const t = [2,3]
+    rt(test(1, ...t))
+`);
+	expect(res).toEqual(1+2+3)
+});
+
+
+test("Destructure-13", () => {
+    let res;
+    let inter = new Interpreter({
+        rt: (val)=>{res = val},
+        console,
+    })
+    inter.evaluate( `
+    function test(one, two, three){
+        return one + two + three
+    }
+    rt(test(1, ...((()=>{return [2,3]})())))
+`);
+	expect(res).toEqual(1+2+3)
+});
