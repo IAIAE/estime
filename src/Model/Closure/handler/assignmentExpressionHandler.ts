@@ -46,7 +46,7 @@ export function assignmentExpressionHandler(this: Interpreter, node: ESTree.Assi
                         value: rightValue,
                         writable: true,
                         enumerable: false,
-                        configurable: false,
+                        configurable: true,
                     });
                     return rightValue
                 }else{

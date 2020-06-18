@@ -136,3 +136,26 @@ rt(Symbol.iterator === Symbol.iterator)
 `);
 	expect(res).toEqual(true);
 });
+
+test("Symbol-10", () => {
+    let res;
+    let inter = new Interpreter({
+        rt: (val)=>{res = val},
+        console,
+    })
+    inter.evaluate( `
+    try{
+        let a = new Symbol('a')
+        rt(2)
+    }catch(e){
+        if(/cannot new a Symbol/.test(e.message)){
+            rt(0)
+        }else{
+            rt(1)
+        }
+    }
+`);
+	expect(res).toEqual(0);
+});
+
+

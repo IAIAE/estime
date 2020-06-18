@@ -315,9 +315,9 @@ es2015\es2017等等申明，个人感觉是非严格的es规范支持声明。es
   - [ ] Set
   - [ ] WeakMap
   - [ ] WeakSet
-- [ ] for-of
+- [x] for-of
 - [ ] Template Strings
-- [ ] Computed property
+- [x] Computed property
 - [x] Symbols
 - [ ] Promises
 - [ ] Generators

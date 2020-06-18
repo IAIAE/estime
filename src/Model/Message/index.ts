@@ -29,6 +29,7 @@ interface Messages {
 	UnknownVariableDeclTypeError: MessageItem;
 	SpreadPatternVariableNoInit: MessageItem;
 	NormalError: MessageItem;
+	VariableNotIterableError: MessageItem;
 }
 
 export type MessageItem = [
@@ -72,6 +73,7 @@ export const Messages: Messages = {
 	UnknownVariableDeclTypeError: [2008, 'Unknown Vaiable Declarator type \'%0\'.', InterruptThrowReferenceError],
 	SpreadPatternVariableNoInit: [2009, 'no init in Rest Pattern Variable.', InterruptThrowReferenceError],
 	NormalError: [2010, '%0', ThrowReferenceError],
+	VariableNotIterableError: [2011, 'variable \'%0\' not iterable.', ThrowTypeError],
 
 
 };

@@ -42,6 +42,7 @@ export class ClosureHandler {
 	whileStatementHandler = handler.whileStatementHandler
 	doWhileStatementHandler = handler.doWhileStatementHandler
 	forInStatementHandler = handler.forInStatementHandler
+	forOfStatementHandler = handler.forOfStatementHandler
 	withStatementHandler = handler.withStatementHandler
 	throwStatementHandler = handler.throwStatementHandler
 	tryStatementHandler = handler.tryStatementHandler
@@ -154,6 +155,9 @@ export class ClosureHandler {
 				break;
 			case "DoWhileStatement":
 				closure = this.doWhileStatementHandler(node);
+				break;
+			case 'ForOfStatement':
+				closure = this.forOfStatementHandler(node);
 				break;
 			case "ForInStatement":
 				closure = this.forInStatementHandler(node);

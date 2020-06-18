@@ -2,6 +2,9 @@ export function createSymbolFunc(){
     let cache = {}
     let count = {}
     function ESymbol(val: string) {
+        if(this instanceof ESymbol){
+            throw new TypeError('cannot new a Symbol')
+        }
         !count[val] && (count[val] = 0)
         count[val] +=1
         return cache[val]?new SymbolClass(val, {count}):(cache[val] = new SymbolClass(val, {count}))
@@ -43,4 +46,8 @@ class SymbolClass {
         // 附加一个偏移量，用于区别val一样的情形
         this.offset = count[val]
     }
+}
+// console.info好像不太管用
+SymbolClass.prototype.toString = SymbolClass.prototype.valueOf = function(){
+    return `Symbol(${this.val})`
 }

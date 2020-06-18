@@ -21,14 +21,24 @@ evt.on('data', val=>{
 
 
 let res = inter.evaluate(`
-let t = Symbol('t')
-let a = {name: 'hello'}
-a[t] = 123
-Object.keys(a).forEach(key=>{
-    console.info(key)
-})
-a[t] = 456
-console.info(a[t])
+let obj = {
+    [Symbol.iterator](){
+        let t = 0
+        return {
+            next(){
+                if(t>3){
+                    return {done: true, value: 10}
+                }else{
+                    t++;
+                    return {done: false, value: t}
+                }
+            }
+        }
+    }
+}
+for(const val of obj){
+    console.info(val)
+}
 `)
 
 console.info('res is ', res)

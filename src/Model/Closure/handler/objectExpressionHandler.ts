@@ -3,6 +3,7 @@ import { BaseClosure, } from '../../Closure'
 import { Messages } from '../../Message'
 import { Interpreter } from '../../../interpreter/main'
 import { defineFunctionName } from '../../../util'
+import { isSymbol, storeKey } from "../../Symbols";
 
 
 // var o = {a: 1, b: 's', get name(){}, set name(){}  ...}
@@ -32,22 +33,36 @@ export function objectExpressionHandler(this: Interpreter, node: ESTree.ObjectEx
             set?: BaseClosure;
         };
     } = Object.create(null);
-
+    const computedProperties: {
+        keyClosure: BaseClosure
+        kind: 'init' | 'get' | 'set'
+        valueClosure: BaseClosure
+    }[] = []
     node.properties.forEach(property => {
         if (property.type == 'Property') {
             const kind = property.kind;
-            const key = getKey(property.key);
+            if(!property.computed){
+                const key = getKey(property.key);
 
-            if (!properties[key] || kind === "init") {
-                properties[key] = {};
+                if (!properties[key] || kind === "init") {
+                    properties[key] = {};
+                }
+
+                properties[key][kind] = this.createClosure(property.value);
+
+                items.push({
+                    key,
+                    property,
+                });
+            }else{
+                const keyClosure = this.createClosure(property.key)
+                computedProperties.push({
+                    keyClosure,
+                    kind,
+                    valueClosure: this.createClosure(property.value)
+                })
+
             }
-
-            properties[key][kind] = this.createClosure(property.value);
-
-            items.push({
-                key,
-                property,
-            });
         } else if (property.type == 'SpreadElement') {
             // ts声明没有这个type，也是醉了
             items.push({
@@ -61,7 +76,7 @@ export function objectExpressionHandler(this: Interpreter, node: ESTree.ObjectEx
         const result = {};
         const len = items.length;
 
-        // 保证顺序
+        // 非computed属性。保证顺序
         for (let i = 0; i < len; i++) {
             const item = items[i];
             if (item.key != null) {
@@ -114,8 +129,40 @@ export function objectExpressionHandler(this: Interpreter, node: ESTree.ObjectEx
                     continue
                 }
             }
-
         }
+
+        let prop = {}
+        computedProperties.forEach(pr=>{
+            let key = pr.keyClosure()
+            let isSb = isSymbol(key)
+            let name = isSb?storeKey(key):key
+            if(!prop[name]){prop[name] = {}}
+            prop[name][pr.kind] = pr.valueClosure()
+            prop[name]['symbol'] = isSb
+        })
+        Object.getOwnPropertyNames(prop).forEach(name=>{
+            let item = prop[name]
+            if("set" in item || "get" in item){
+                const descriptor = {
+                    configurable: true,
+                    enumerable: item.symbol?false:true,
+                    get: item.get || function () { },
+                    set: item.set || function (a) { },
+                };
+                Object.defineProperty(result, name, descriptor);
+            }else{
+                if(item.symbol){
+                    Object.defineProperty(result, name, {
+                        value: item.init,
+                        writable: true,
+                        enumerable: false,
+                        configurable: true,
+                    })
+                }else{
+                    result[name] = item.init
+                }
+            }
+        })
 
         return result;
     };
