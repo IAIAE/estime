@@ -9,7 +9,9 @@ let inter = new Interpreter({
     postMessage: (type, val)=>{ evt.emit(type, val) },
     console: console
 }, {
-    ecmaVersion: 2018
+    ecmaVersion: 2018,
+    rootContext: {},
+    globalContextInFunction: {}
 })
 
 evt.on('result', val=>{
@@ -21,26 +23,39 @@ evt.on('data', val=>{
 
 
 let res = inter.evaluate(`
-function m1(){
-    var title = 'm1'
-
-    throw 'error'
-}
-function m2(){
-    var title = 'm2';
-    m1();
-
-}
-function m3(){
-    var title = 'm3';
-    try {
-        m2();
-    } catch(e) {
-      return  title
+class Sup {
+    constructor(){
+        this.mother = 'love'
+    }
+    me = 'Im your father'
+    father(){
+        console.info(this.me)
     }
 }
+class Test extends Sup {
+    name = 123
+    constructor(){
 
-m3()
+    }
+    getName = () => {
+        return this.name
+    }
+    getNameNoBind(){
+        return this.name
+    }
+    static show(){
+        console.info('test show')
+    }
+}
+let t = new Test
+console.info(t.name)
+let tt = t.getName
+console.info(tt())
+console.info(t.getNameNoBind())
+tt = t.getNameNoBind
+console.info(tt())
+t.father()
+console.info(t.mother)
 `)
 
 console.info('res is ', res)

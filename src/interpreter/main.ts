@@ -1,5 +1,9 @@
 import Scope, {ScopeData, createScope} from '../Model/Scope'
-import { parse } from "acorn";
+import { Parser } from "acorn";
+let MyParser = Parser.extend(
+	require('acorn-class-fields'),
+	require('acorn-static-class-features'),
+)
 import {
 	Messages,
 	MessageItem,
@@ -476,7 +480,7 @@ export class Interpreter extends ClosureHandler {
 
 		if (!code) return;
 
-		node = parse(code, {
+		node = MyParser.parse(code, {
 			ranges: true,
 			locations: true,
 			ecmaVersion: this.options.ecmaVersion || Interpreter.ecmaVersion,

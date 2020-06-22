@@ -58,7 +58,7 @@ export class ClosureHandler {
 	spreadElementHandler = handler.spreadElementHandler
 	templateLiteralHandler = handler.templateLiteralHandler
 	classDeclarationHandler = handler.classDeclarationHandler
-	// classExpressionHandler = handler.classExpressionHandler
+	classExpressionHandler = handler.classExpressionHandler
 
     protected getClosure(this: Interpreter, node: Node): BaseClosure|null {
 		let closure: BaseClosure|null = null;
@@ -67,9 +67,9 @@ export class ClosureHandler {
 			case 'ClassDeclaration':
 				closure = this.classDeclarationHandler(node);
 				break
-			// case 'ClassExpression':
-			// 	closure = this.classExpressionHandler(node);
-			// 	break;
+			case 'ClassExpression':
+				closure = this.classExpressionHandler(node);
+				break;
 			case "BinaryExpression":
 				closure = this.binaryExpressionHandler(node);
 				break;

@@ -296,11 +296,11 @@ es2015\es2017等等申明，个人感觉是非严格的es规范支持声明。es
 - [x] 块级作用域
   - [x] let
   - [x] const
-- [ ] Class
-  - [ ] 基础声明
-  - [ ] extends
-  - [ ] class fields
-  - [ ] static property
+- [x] Class
+  - [x] 基础声明
+  - [x] extends
+  - [x] class fields
+  - [x] static property
 - [x] 箭头函数
   - [x] 基础执行支持
   - [x] context绑定

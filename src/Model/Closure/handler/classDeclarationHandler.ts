@@ -7,19 +7,24 @@ import {EmptyStatementReturn} from '../../Symbols'
 
 // class Test {...}
 export function classDeclarationHandler(this: Interpreter, node: ESTree.ClassDeclaration): BaseClosure {
-    if (node.id) {
-        // const classClosure = this.classExpressionHandler(node);
-        // Object.defineProperty(classClosure, "isFunctionDeclareClosure", {
-        //     value: true,
-        //     writable: false,
-        //     configurable: false,
-        //     enumerable: false,
-        // });
-        // // class的本质也是function，直接申明一个函数名也没毛病
-        // this.funcDeclaration(node.id.name, classClosure);
+    let className;
+    let classClosure
+    // class的作用域是块级作用域
+    if(node.id){
+        classClosure = this.classExpressionHandler(node);
+        let stackTop = this.collectDeclLex[this.collectDeclLex.length - 1]
+        stackTop && (stackTop[node.id.name] = {
+            init: false,
+            kind: 'let'
+        })
+        className = node.id.name
     }
     return () => {
+        if(className){
+            let scope = this.getCurrentScope()
+            scope.lexDeclared[className].init = true
+            scope.data[className] = classClosure()
+        }
         return EmptyStatementReturn;
     };
-
 }
