@@ -15,10 +15,11 @@ export function programHandler(this: Interpreter, node: ESTree.Program | ESTree.
     // 记录当前块级作用域的所有词法变量的声明
     this.blockDeclareStart()
     // 块级作用域的handler初始化的时候就会遍历下级所有的body，创建closure，创建closure的时候就会完成变量声明提升的操作
-    const stmtClosures: Array<BaseClosure> = (node.body as Node[]).map((stmt: Node) => {
+    let stmtClosures: Array<BaseClosure> = (node.body as Node[]).map((stmt: Node) => {
         // if (stmt.type === "EmptyStatement") return null;
         return this.createClosure(stmt);
     });
+    let functionDecl = (node.body as Node[]).map((_, index)=>({type: _.type, index})).filter(_=>_.type == 'FunctionDeclaration')
     // 存放了块级作用域变量的列表
     let lexDeclared = this.blockDeclareEnd()
 
@@ -31,6 +32,13 @@ export function programHandler(this: Interpreter, node: ESTree.Program | ESTree.
             newScope.lexDeclared = lexDeclared
             prevScope = this.entryBlockScope(newScope)
         }
+        // 如果有函数声明，先执行函数声明：
+        functionDecl.forEach(_=>{
+            stmtClosures[_.index]()
+            // @ts-ignore
+            stmtClosures[_.index] = null
+        })
+        stmtClosures = stmtClosures.filter(_=>_)
         for (let i = 0; i < stmtClosures.length; i++) {
             const stmtClosure = stmtClosures[i];
 

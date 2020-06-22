@@ -97,7 +97,7 @@ test("invalid function call", () => {
 		evaluate(
 			`
   const a = 123;
-  
+
    a(); // a is not a function
     `
 		);
@@ -335,7 +335,7 @@ test("function overlap4", () => {
 
 	const a = evaluate(
 		`
-      var dat = undefined; 
+      var dat = undefined;
       function dat() { }
 
       typeof dat
@@ -351,7 +351,7 @@ test("function overlap5", () => {
 
 	const a = evaluate(
 		`
-      var dat; 
+      var dat;
       function dat() { }
 
       typeof dat
@@ -368,7 +368,7 @@ test("function overlap5", () => {
 	const a = evaluate(
 		`
       function dat() {
-         function d1(){}    
+         function d1(){}
       }
 
       typeof d1
@@ -522,4 +522,45 @@ test("function arguments reset without use strict", () => {
 	);
 
 	expect(a).toEqual([1, 2, 3]);
+});
+
+
+test("test function declaration with if statement 1", () => {
+	let res;
+	const interpreter = new Interpreter({
+		rt: _=>(res = _)
+	});
+
+	interpreter.evaluate(
+		`
+if(false){
+	function test(){
+
+	}
+}
+rt(test)
+    `
+	);
+
+	expect(res).toEqual(undefined);
+});
+
+
+test("test function declaration with if statement 2", () => {
+	let res;
+	const interpreter = new Interpreter({
+		rt: _=>(res = _)
+	});
+
+	interpreter.evaluate(
+		`
+if(true){
+	let t = 123;
+	function test(){return t}
+}
+rt(test())
+    `
+	);
+
+	expect(res).toEqual(123);
 });

@@ -1,6 +1,7 @@
 import {Interpreter} from '../src/interpreter/main'
 import {EventEmitter} from 'events'
-
+const fs = require('fs')
+const path = require('path')
 
 let evt = new EventEmitter()
 
@@ -19,26 +20,27 @@ evt.on('data', val=>{
 })
 
 
-
 let res = inter.evaluate(`
-let obj = {
-    [Symbol.iterator](){
-        let t = 0
-        return {
-            next(){
-                if(t>3){
-                    return {done: true, value: 10}
-                }else{
-                    t++;
-                    return {done: false, value: t}
-                }
-            }
-        }
+function m1(){
+    var title = 'm1'
+
+    throw 'error'
+}
+function m2(){
+    var title = 'm2';
+    m1();
+
+}
+function m3(){
+    var title = 'm3';
+    try {
+        m2();
+    } catch(e) {
+      return  title
     }
 }
-for(const val of obj){
-    console.info(val)
-}
+
+m3()
 `)
 
 console.info('res is ', res)

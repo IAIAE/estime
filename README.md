@@ -299,6 +299,8 @@ es2015\es2017等等申明，个人感觉是非严格的es规范支持声明。es
 - [ ] Class
   - [ ] 基础声明
   - [ ] extends
+  - [ ] class fields
+  - [ ] static property
 - [x] 箭头函数
   - [x] 基础执行支持
   - [x] context绑定
@@ -316,7 +318,7 @@ es2015\es2017等等申明，个人感觉是非严格的es规范支持声明。es
   - [ ] WeakMap
   - [ ] WeakSet
 - [x] for-of
-- [ ] Template Strings
+- [x] Template Strings
 - [x] Computed property
 - [x] Symbols
 - [ ] Promises

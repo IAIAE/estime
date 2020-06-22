@@ -305,6 +305,10 @@ export class Interpreter extends ClosureHandler {
 	protected collectDeclFuncs: CollectDeclarations = Object.create(null);
 	// 编译时存放块级作用域的层级结构的声明，用于判断var声明时候是否非法（var的申明可以覆盖var，但是不能覆盖let等块级声明）
 	protected collectDeclLex: LexContext[] = []
+	/**
+	 * 用于临时存放函数声明的scope，函数声明执行时会用它更新函数体
+	 */
+	protected _functionVarScope: Scope
 	protected isVarDeclMode: boolean = false;
 
 	protected lastExecNode: Node | null = null;
@@ -521,7 +525,8 @@ export class Interpreter extends ClosureHandler {
 				this.collectDeclFuncs,
 				this.getCurrentScope()
 			);
-
+			let currScope = this.getCurrentScope()
+			this._functionVarScope = currScope
 			bodyClosure();
 		} catch (e) {
 			throw e;
@@ -690,6 +695,7 @@ export class Interpreter extends ClosureHandler {
 					if (node.type === "Identifier") {
 						name = node.name;
 					}
+					// console.info('the scope is ', this.getCurrentScope())
 					// const name: string = (<ESTree.Identifier>node).name;
 					const func = closure();
 
@@ -946,7 +952,6 @@ export class Interpreter extends ClosureHandler {
 
 		for (let key in declFuncs) {
 			const value = declFuncs[key];
-			// 一个函数执行时候的scope在这个时候就已经确定了
 			scopeData[key] = value ? value() : value;
 		}
 

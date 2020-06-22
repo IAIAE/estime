@@ -1,12 +1,12 @@
 {
-  "name": "estime",
-  "version": "1.0.0",
-  "description": "estime = ecmascript + runtime, in javascipt(es5) environment",
-  "main": "./dist/cjs/index.js",
+	"name": "estime",
+	"version": "1.0.0",
+	"description": "estime = ecmascript + runtime, in javascipt(es5) environment",
+	"main": "./dist/cjs/index.js",
 	"module": "./dist/esm/index.js",
 	"types": "./lib/index.d.ts",
-  "scripts": {
-    "start": "tsc -w",
+	"scripts": {
+		"start": "tsc -w",
 		"build": "run-s clear build:* bundle:dev bundle:prod bundle:banner",
 		"build:lib": "tsc",
 		"build:cjs": "babel lib --config-file=./babel.config.js  --out-dir dist/cjs",
@@ -16,12 +16,12 @@
 		"bundle:prod": "packez bundle ./src/index.ts -d umd --state prod",
 		"bundle:banner": "node scripts/banner.js",
 		"test": "jest"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/IAIAE/estime.git"
-  },
-  "keywords": [
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/IAIAE/estime.git"
+	},
+	"keywords": [
 		"interpreter",
 		"js-interpreter",
 		"eval",
@@ -34,14 +34,14 @@
 		"lib",
 		"dist",
 		"*.md"
-  ],
-  "author": "iaiae.china@gmail.com",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/IAIAE/estime/issues"
-  },
-  "homepage": "https://github.com/IAIAE/estime#readme",
-  "devDependencies": {
+	],
+	"author": "iaiae.china@gmail.com",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/IAIAE/estime/issues"
+	},
+	"homepage": "https://github.com/IAIAE/estime#readme",
+	"devDependencies": {
 		"@babel/cli": "^7.8.4",
 		"@types/fs-extra": "^8.1.0",
 		"@types/jest": "^24.0.25",
@@ -57,7 +57,10 @@
 		"@babel/runtime": "^7.8.4",
 		"@types/acorn": "^4.0.5",
 		"@types/estree": "0.0.41",
-		"acorn": "^7.1.0"
+		"acorn": "^7.1.0",
+		"acorn-class-fields": "^0.3.6",
+		"acorn-jsx": "^5.2.0",
+		"acorn-static-class-features": "^0.2.3"
 	},
 	"browserslist": [
 		">=0.25%",

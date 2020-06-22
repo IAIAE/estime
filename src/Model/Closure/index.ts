@@ -56,11 +56,20 @@ export class ClosureHandler {
 	arrowFunctionExpressionHandler = handler.arrowFunctionExpressionHandler
 	objectPatternAssignHandler = handler.objectPatternAssignHandler
 	spreadElementHandler = handler.spreadElementHandler
+	templateLiteralHandler = handler.templateLiteralHandler
+	classDeclarationHandler = handler.classDeclarationHandler
+	// classExpressionHandler = handler.classExpressionHandler
 
     protected getClosure(this: Interpreter, node: Node): BaseClosure|null {
 		let closure: BaseClosure|null = null;
 
 		switch (node.type) {
+			case 'ClassDeclaration':
+				closure = this.classDeclarationHandler(node);
+				break
+			// case 'ClassExpression':
+			// 	closure = this.classExpressionHandler(node);
+			// 	break;
 			case "BinaryExpression":
 				closure = this.binaryExpressionHandler(node);
 				break;
@@ -114,6 +123,9 @@ export class ClosureHandler {
 				break;
 			case "VariableDeclaration":
 				closure = this.variableDeclarationHandler(node);
+				break;
+			case 'TemplateLiteral':
+				closure = this.templateLiteralHandler(node);
 				break;
 			case "BlockStatement":
 			case "Program":
