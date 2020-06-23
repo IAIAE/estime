@@ -30,21 +30,26 @@ todo:
 ```javascript
 import { Interpreter } from "estime";
 
-const interpreter = new Interpreter(window, {
-	timeout: 1000,
+const interpreter = new Interpreter({
+  console,
+  rt: (val) => (res = val)
 });
 
-let result;
-
 try {
-	result = interpreter.evaluate("1+1");
-	console.log(result);
-
-	interpreter.evaluate("var a=100");
-	interpreter.evaluate("var b=200");
-	result = interpreter.evaluate("a+b");
-
-	console.log(result);
+  let res;
+  interpreter.evaluate(`
+    class Test {
+      name = 'default_test';
+      setName = (name) => {
+        this.name = name
+      }
+    }
+    let t = new Test
+    t.setName('hello')
+    console.info(t.name)
+    rt(t.name)
+  `);
+  console.info('the result is ', res)
 } catch (e) {
 	console.log(e);
 }
@@ -54,8 +59,6 @@ try {
 
 ```ts
 interface Options {
-	// 默认为：0，不限制
-	timeout?: number;
 	// 根作用域，只读
 	rootContext?: {} | null;
 	globalContextInFunction?: any;
@@ -64,21 +67,20 @@ interface Options {
 
 Example
 
-```
+```javascript
 import { Interpreter } from "estime";
 
 const ctx = {};
 const interpreter = new Interpreter(ctx, {
-    rootContext: window,
-	timeout: 1000,
+  rootContext: window,
 });
 
 interpreter.evaluate(`
-    a = 100;
-    console.log(a); // 100
+  a = 100;
+  console.log(a); // 100
 `);
 
-window.a;//undefined
+window.a; //undefined
 
 ```
 
@@ -236,13 +238,10 @@ console.log(func(100, 200)); // 300
 ```
 
 ## ES2015 支持
-记得一定要加上ecmaVersion，因为编译器默认指定es5，不特殊指定es6的话编译阶段就会报错
 ```javascript
 import {Interpreter} from '../src/interpreter/main'
 
-let inter = new Interpreter(null, {
-    ecmaVersion: 2015
-})
+let inter = new Interpreter(null)
 
 let res = inter.evaluate(`
 let a = (function(){
@@ -268,25 +267,55 @@ console.info(res)  // 123
 ## JSX支持
 todo:
 
-## vm
-
-查看 [vm](https://nodejs.org/dist/latest-v13.x/docs/api/vm.html)
-
--   vm.createContext
--   vm.compileFunction
--   vm.runInContext
--   vm.runInNewContext
--   vm.Script
 
 ## License
-
-MIT
+Mozilla Public License Version 2.0
 
 ## 相关
 
--   [evaljs](https://github.com/marten-de-vries/evaljs)
--   [closure-interpreter](https://github.com/int3/closure-interpreter)
+-  [evaljs](https://github.com/marten-de-vries/evaljs)
+-  [closure-interpreter](https://github.com/int3/closure-interpreter)
+-  [typescript:generator.ts](https://github.com/Microsoft/TypeScript/blob/master/src/compiler/transformers/generators.ts)
 
+
+## generator相关实现方法
+generator的实现是难点，但其功能又如此重要（异步方法的基石），不得不支持。目前正在纠结中，将generator的定义转换成es5可执行的同等函数，其工作量不亚于再写一个js解释器。有现成的npm包比如`regenerator`可以将generator的代码转换成es5的形式，但其包体大小压缩有都有足足1M，我是肯定不会用的。typescript的源码中带有转换generator的代码，两千多行，不同的是ts只是一个预编译期，我需要的是一个解释器，目前准备复刻并精简这部分代码，看最终能否达到理想效果。如果解析没问题的话，代码生成和ts的有所差异，ts生成的是switch结构的label标签作为定位代码段，这种hard code的方式肯定不符合我动态执行的要求，转而我需要的大概是一个模拟switch行为的路由确定执行代码段。
+
+ts生成的es5代码大概是这样的：
+```javascript
+function f() {
+  var /*locals*/;
+  /*functions*/
+  return __generator(function (state) {
+    switch (state.label) {
+      /*cases per label*/
+    }
+  });
+}
+```
+
+而我们需要构造的runtime方法大概是这样的：
+```javascript
+function f(){
+  var /*locals*/;
+  /*functions*/
+  let __block_label_map = {
+    0: someBlockClosure,
+    1: someBlockClosure,
+    // ...
+  }
+  return __generator(function(state){
+    let res;
+    for(let i=shareObj.label; i<=10; i++){
+        if(res = mapp[shareObj.label].call(this, shareObj)){
+            return res
+        }
+    }
+  })
+}
+```
+这样我们就可以专注于生成每个代码段的closure，而复用一个统一形式的方法了。
+另外需要注意的是someBlockClosure可以单独定义一个handler和type。它和函数类似采用初始化时作用域(能够访问同级的var变量，而不是访问调用时候的作用域)，而在执行的时候又不单独生成scope。因为我们可以确定someBlockClosure中是没有变量定义的，这样就减少了用函数closure时不必要的创建scope开销。
 
 # todoList
 es2015\es2017等等申明，个人感觉是非严格的es规范支持声明。es的规范会经过不同stage的提案状态，有些特性还在stage-1等就已经放出来开始广泛使用了。所以对于es2015，你会看到有“对象解构”，但是实际上在2015年的时候，它还不是stage-4。我看acorn.js在es2018才支持解构，但是babel的文档上，es2015就已经包含解构了，这样的差异还真不好细究清楚，且深究也没有意义。所以，我没有局限在2015还是2017上，关注的是特性，需要支持的特性下面的todolist都会列出来。

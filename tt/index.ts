@@ -23,19 +23,7 @@ evt.on('data', val=>{
 
 
 let res = inter.evaluate(`
-let setName = 'setName'
-class Test {
-    name = 123;
-    [setName] = (val) => {
-        this.name = val
-    }
-    getName = (val) => {
-        return this.name
-    }
-}
-let t = new Test
-t.setName('world')
-console.info(t.getName())
+
 `)
 
 console.info('res is ', res)
