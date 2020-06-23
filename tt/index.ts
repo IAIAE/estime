@@ -23,39 +23,19 @@ evt.on('data', val=>{
 
 
 let res = inter.evaluate(`
-class Sup {
-    constructor(){
-        this.mother = 'love'
+let setName = 'setName'
+class Test {
+    name = 123;
+    [setName] = (val) => {
+        this.name = val
     }
-    me = 'Im your father'
-    father(){
-        console.info(this.me)
-    }
-}
-class Test extends Sup {
-    name = 123
-    constructor(){
-
-    }
-    getName = () => {
+    getName = (val) => {
         return this.name
-    }
-    getNameNoBind(){
-        return this.name
-    }
-    static show(){
-        console.info('test show')
     }
 }
 let t = new Test
-console.info(t.name)
-let tt = t.getName
-console.info(tt())
-console.info(t.getNameNoBind())
-tt = t.getNameNoBind
-console.info(tt())
-t.father()
-console.info(t.mother)
+t.setName('world')
+console.info(t.getName())
 `)
 
 console.info('res is ', res)

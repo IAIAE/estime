@@ -141,12 +141,12 @@ export function classExpressionHandler(
             func[item.name.computed?(item.name.value as BaseClosure)():item.name.value] = item.value()
         })
         if(className){
-            Object.defineProperty(func, 'name', {
-                value: className,
-                configurable: false,
-                enumerable: false,
+            Object.defineProperty(func, "name", {
+                value: name,
                 writable: false,
-            })
+                enumerable: false,
+                configurable: true,
+            });
         }
         return func
     };

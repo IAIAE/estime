@@ -24,6 +24,7 @@ export function assignmentExpressionHandler(this: Interpreter, node: ESTree.Assi
     const nameGetter = this.createNameGetter(node.left);
     const rightValueGetter = this.createClosure(node.right);
 
+
     return () => {
         // dataGetter执行时，判断如果是const且已经初始化，会报错
         const data = dataGetter();

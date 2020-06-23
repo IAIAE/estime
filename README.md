@@ -312,11 +312,7 @@ es2015\es2017等等申明，个人感觉是非严格的es规范支持声明。es
   - [x] ObjectPattern
   - [x] ArrayPattern
   - [x] 函数形参rest
-- [ ] Map + Set + WeakMap + WeakSet
-  - [ ] Map
-  - [ ] Set
-  - [ ] WeakMap
-  - [ ] WeakSet
+- [x] Map + Set + WeakMap + WeakSet 由外部提供支持，沙箱不做特殊支持
 - [x] for-of
 - [x] Template Strings
 - [x] Computed property
