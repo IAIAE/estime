@@ -23,7 +23,10 @@ evt.on('data', val=>{
 
 
 let res = inter.evaluate(`
-
+let t = [1,2,3]
+for(let val of t.entries()){
+    console.info(val)
+}
 `)
 
 console.info('res is ', res)

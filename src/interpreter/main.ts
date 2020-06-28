@@ -1,4 +1,4 @@
-import Scope, {ScopeData, createScope} from '../Model/Scope'
+import Scope, { ScopeData, createScope } from '../Model/Scope'
 import { Parser } from "acorn";
 let MyParser = Parser.extend(
 	require('acorn-class-fields'),
@@ -12,10 +12,10 @@ import {
 	InterruptThrowSyntaxError,
 } from "../Model/Message";
 import { Node, ESTree } from "../Model/Node";
-import {ClosureHandler, BaseClosure, CaseItem, ReturnStringClosure, SwitchCaseClosure} from '../Model/Closure'
-import {Break, Continue, DefaultCase, EmptyStatementReturn, GlobalScopeName, RootScopeName, SuperScopeName, WithScopeName, createSymbolFunc} from '../Model/Symbols'
-import {BreakLabel, ContinueLabel, Return} from '../Model/TokenClass'
-import {isFunction} from '../util'
+import { ClosureHandler, BaseClosure, CaseItem, ReturnStringClosure, SwitchCaseClosure } from '../Model/Closure'
+import { Break, Continue, DefaultCase, EmptyStatementReturn, GlobalScopeName, RootScopeName, SuperScopeName, WithScopeName, createSymbolFunc } from '../Model/Symbols'
+import { BreakLabel, ContinueLabel, Return } from '../Model/TokenClass'
+import { isFunction } from '../util'
 
 const version = "%VERSION%";
 
@@ -388,27 +388,27 @@ export class Interpreter extends ClosureHandler {
 	/**
 	 * 包含块级作用域的语句声明之前执行。创建一个新的hash，记录块作用域内声明的let/const变量
 	 */
-	protected blockDeclareStart(){
+	protected blockDeclareStart() {
 		this.collectDeclLex.push(Object.create(null))
 	}
 
 	/**
 	 * 包含块级作用域的语句声明之后执行，退栈，获取该块作用域声明的let/const变量
 	 */
-	protected blockDeclareEnd():LexContext|null{
+	protected blockDeclareEnd(): LexContext | null {
 		// 准备块级作用域初始化必要参数
 		let lexDeclInThisBlock = this.collectDeclLex.pop()
 		let lexDeclared: LexContext | null;
 		let lexNames = Object.getOwnPropertyNames(lexDeclInThisBlock)
-		if(lexNames.length){
+		if (lexNames.length) {
 			lexDeclared = Object.create(null)
-			lexNames.forEach(key=>{
+			lexNames.forEach(key => {
 				lexDeclared![key] = {
 					init: false,
 					kind: lexDeclInThisBlock![key].kind
 				}
 			})
-		}else {
+		} else {
 			// 说明没有词法变量，那就不用新建作用域了
 			lexDeclared = null
 		}
@@ -558,11 +558,11 @@ export class Interpreter extends ClosureHandler {
 		return message;
 	}
 
-	protected createError<T>(message: string, error: { new (msg: string): T }): T {
+	protected createError<T>(message: string, error: { new(msg: string): T }): T {
 		return new error(message);
 	}
 
-	protected createThrowError<T>(message: string, error: { new (msg: string): T }): T {
+	protected createThrowError<T>(message: string, error: { new(msg: string): T }): T {
 		return this.createError(message, error);
 	}
 
@@ -597,9 +597,9 @@ export class Interpreter extends ClosureHandler {
 	}
 
 
-	protected createClosure(node: ESTree.Node): BaseClosure{
+	protected createClosure(node: ESTree.Node): BaseClosure {
 		let closure = this.getClosure(node)
-		if(!closure){
+		if (!closure) {
 			throw this.createInternalThrowError(Messages.NodeTypeSyntaxError, node.type, node);
 		}
 		return (...args: any[]) => {
@@ -816,7 +816,7 @@ export class Interpreter extends ClosureHandler {
 	protected createParamNameGetter(node: ESTree.Pattern): ReturnStringClosure {
 		if (node.type === "Identifier") {
 			return () => node.name;
-		}else if(node.type === 'RestElement'){
+		} else if (node.type === 'RestElement') {
 			return this.createParamNameGetter(node.argument)
 		} else {
 			throw this.createInternalThrowError(Messages.ParamTypeSyntaxError, node.type, node);
@@ -852,16 +852,16 @@ export class Interpreter extends ClosureHandler {
 	 * 不是作为左值调用，用createObjectGetter即可
 	 * @param node
 	 */
-	protected createLeftObjectGetter(node: ESTree.Expression | ESTree.Pattern):Getter{
-		switch(node.type){
+	protected createLeftObjectGetter(node: ESTree.Expression | ESTree.Pattern): Getter {
+		switch (node.type) {
 			case 'Identifier':
 				return () => {
 					let name = node.name
 					let scope = this.getScopeFromName(name, this.getCurrentScope(), true)
-					if(scope.lexDeclared && scope.lexDeclared[name] && scope.lexDeclared[name].kind == 'const'){
-						if(scope.lexDeclared[name].init === false){
+					if (scope.lexDeclared && scope.lexDeclared[name] && scope.lexDeclared[name].kind == 'const') {
+						if (scope.lexDeclared[name].init === false) {
 							scope.lexDeclared[name].init = true
-						}else{
+						} else {
 							// console.info('node ====> ', node, scope)
 							throw this.createInternalThrowError(
 								Messages.ConstChangeError,
@@ -988,17 +988,17 @@ export class Interpreter extends ClosureHandler {
 		let scope: Scope | null = startScope;
 
 		do {
-			if(scope.type == 'block'){
-				if(!scope.lexDeclared[name]){
+			if (scope.type == 'block') {
+				if (!scope.lexDeclared[name]) {
 					// 按理说，一个blockscope上的所有变量都标记在lexDeclared中，也有例外情况，
 					// 比如catch(e){}中，变量e会零时插入，且lexDeclared上也不会有标记
-					if(name in scope.data){
+					if (name in scope.data) {
 						return scope
 					}
 					// 否则向上找
-				}else{
-					if(scope.lexDeclared[name].init === false){
-						if(constInit && scope.lexDeclared[name].kind == 'const'){
+				} else {
+					if (scope.lexDeclared[name].init === false) {
+						if (constInit && scope.lexDeclared[name].kind == 'const') {
 							// const变量初始化的时候这个校验位还没有置为true，放行
 							return scope
 						}
@@ -1006,15 +1006,15 @@ export class Interpreter extends ClosureHandler {
 							Messages.LetVariableUseBeforeInitReferenceError,
 							name,
 						);
-					}else if(scope.lexDeclared[name].init === true){
+					} else if (scope.lexDeclared[name].init === true) {
 						return scope
 					}
 					// 否则向上找
 				}
-			}else{
+			} else {
 				// function scope
 				// 函数级别的作用域也可能有lexDeclared
-				if(scope.lexDeclared && scope.lexDeclared[name] && scope.lexDeclared[name].init === false){
+				if (scope.lexDeclared && scope.lexDeclared[name] && scope.lexDeclared[name].init === false) {
 					throw this.createInternalThrowError(
 						Messages.LetVariableUseBeforeInitReferenceError,
 						name
@@ -1030,7 +1030,7 @@ export class Interpreter extends ClosureHandler {
 
 		return this.globalScope;
 	}
-	protected entryBlockScope(newScope: Scope):Scope{
+	protected entryBlockScope(newScope: Scope): Scope {
 		const prevScope = this.getCurrentScope();
 		// 函数执行时，创建新的scope，然后下一行将程序的运行指针指向新的scope
 		this.setCurrentScope(newScope);
