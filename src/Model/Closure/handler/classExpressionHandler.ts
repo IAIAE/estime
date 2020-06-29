@@ -142,7 +142,7 @@ export function classExpressionHandler(
         })
         if(className){
             Object.defineProperty(func, "name", {
-                value: name,
+                value: className,
                 writable: false,
                 enumerable: false,
                 configurable: true,

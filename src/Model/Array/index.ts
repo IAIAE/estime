@@ -1,3 +1,6 @@
+import {EIterator} from '../Iterator'
+import { thisExpressionHandler } from '../Closure/handler';
+
 /**
  * 这个是对Array的封装
  * 为什么要这么做，请看issue：https://github.com/IAIAE/estime/issues/5
@@ -256,11 +259,188 @@ export default class MyArray {
         }
     }
 
+    public shift(){
+        return this.__nativeFunc('shift', [])
+    }
 
+    public unshift(){
+        return this.__nativeFunc('unshift', [])
+    }
 
+    public sort(...args){
+        this.__nativeFunc('sort', args)
+        return this
+    }
 
+    public splice(...args){
+        this.__nativeFunc('splice', args)
+    }
 
+    public includes(...args){
+        if(!Array.prototype.includes){
+            let target = args[0]
+            let fromIndex = args[1]
+            let len = this.length
+            fromIndex = fromIndex>=0?fromIndex:(len + fromIndex)
+            for(let i=fromIndex; i<len; i++){
+                if(this.__arr[i] === target){
+                    return true
+                }
+            }
+            return false;
+        }else{
+            return this.__nativeFunc('includes', args)
+        }
+    }
 
+    public indexOf(...args){
+        return this.__nativeFunc('indexOf', args)
+    }
+
+    public join(...args){
+        return this.__nativeFunc('join', args)
+    }
+
+    /**
+     * 对于keys的调用是没有参数的，但是沙箱内部会传入一个当前环境的Symbol构造类进来。
+     * @param Smbl
+     */
+    public keys(Smbl){
+        let len = this.length
+        let count = 0
+        return new EIterator(Smbl, {
+            next: ()=>{
+                if(count<len){
+                    return {done: false, value: count++}
+                }else{
+                    return {done: true, value: count}
+                }
+            }
+        })
+    }
+
+    /**
+     * 对于entries的调用是没有参数的，但是沙箱内部会传入一个当前环境的Symbol构造类进来。
+     * @param Smbl
+     */
+    public entries(Smbl){
+        let arr = this.__arr.map(_=>_)
+        let len = this.length
+        let count = 0
+        return new EIterator(Smbl, {
+            next: ()=>{
+                if(count<len){
+                    return {done: false, value: [count, arr[count++]]}
+                }else{
+                    return {done: true, value: null}
+                }
+            }
+        })
+    }
+
+    public values(Smbl){
+        let arr = this.__arr.map(_=>_)
+        let len = this.length
+        let count = 0
+        return new EIterator(Smbl, {
+            next: ()=>{
+                if(count<len){
+                    return {done: false, value: arr[count++]}
+                }else{
+                    return {done: true, value: null}
+                }
+            }
+        })
+    }
+
+    public forEach(...args){
+        return this.__nativeFunc('forEach', args)
+    }
+
+    public filter(...args){
+        return this.__nativeFunc('filter', args)
+    }
+
+    public flat(...args){
+        // @ts-ignore
+        if(!Array.prototype.flat){
+            let depth = args[0]
+            if(depth === undefined){
+                depth = 1
+            }
+            if(+depth !== depth){
+                throw new TypeError('first parameter of Array.prototype.flat must be number')
+            }
+            let t = new MyArray
+            t.__arr = [...flatten(this.__arr, depth)]
+            return t;
+        }else{
+            return this.__nativeNewFunc('flat', args)
+        }
+    }
+
+    public flatMap(...args){
+        // @ts-ignore
+        if(!Array.prototype.flatMap){
+            let func = args[0]
+            if(typeof func != 'function'){
+                throw new TypeError('first parameter of Array.prototype.flatMap must be function')
+            }
+            let t = new MyArray
+            t.__arr = [...flatten(this.__arr.map(func), 1)]
+            return t;
+        }else{
+            return this.__nativeNewFunc('flatMap', args)
+        }
+    }
+
+    public map(...args){
+        return this.__nativeNewFunc('map', args)
+    }
+
+    public every(...args){
+        return this.__nativeFunc('every', args)
+    }
+
+    public some(...args){
+        return this.__nativeFunc('some', args)
+    }
+
+    public reduce(...args){
+        return this.__nativeFunc('reduce', args)
+    }
+
+    public reduceRight(...args){
+        if(!Array.prototype.reduceRight){
+            let func = args[0]
+            if(typeof func != 'function'){
+                throw new TypeError('first parameter of Array.prototype.reduceRight must be function')
+            }
+            let initialValue = args[1]
+            let startIndex = this.length - 1
+            if(initialValue === undefined){
+                if(this.length == 0){
+                    throw new TypeError('calling reduceRight on an empty array without an initial value')
+                }
+                initialValue = this.__arr[this.length - 1]
+                startIndex--
+            }
+            for(let i=startIndex; i>=0; i--){
+                initialValue = func(initialValue, this.__arr[i], i, this)
+            }
+            return initialValue
+        }else{
+            return this.__nativeNewFunc('reduceRight', args)
+        }
+    }
+
+    public toString(){
+        return this.__arr.join(',')
+    }
+
+    public toLocaleString(){
+        return this.toString()
+    }
 
 }
 
@@ -271,6 +451,15 @@ function swithh(arr, i, j){
     arr[j] = t
 }
 
+function* flatten(array, depth) {
+    for(const item of array) {
+        if(Array.isArray(item) && depth > 0) {
+          yield* flatten(item, depth - 1);
+        } else {
+          yield item;
+        }
+    }
+}
 /**
  *  ["length", "constructor", "concat", "copyWithin", "fill", "find", "findIndex", "lastIndexOf", "pop", "push", "reverse", "shift", "unshift", "slice", "sort", "splice", "includes", "indexOf", "join", "keys", "entries", "values", "forEach", "filter", "flat", "flatMap", "map", "every", "some", "reduce", "reduceRight", "toLocaleString", "toString"]
  */

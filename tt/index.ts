@@ -15,7 +15,12 @@ let inter = new Interpreter({
 })
 
 evt.on('result', val=>{
-    console.info('the result is ', val)
+    let T = val;
+    let t = new T;
+    let iter = t.getIter()
+    for(let val of iter){
+        console.info('val ', val)
+    }
 })
 evt.on('data', val=>{
     console.info('on data ', val)
@@ -23,10 +28,25 @@ evt.on('data', val=>{
 
 
 let res = inter.evaluate(`
-let t = [1,2,3]
-for(let val of t.entries()){
-    console.info(val)
+class Test{
+    getIter(){
+        let count = 0;
+        let t = {
+            [Symbol.iterator]: function(){
+                return {
+                    next(){
+                        if(count<4){
+                            count++
+                            return {done: false, value: count}
+                        }else{
+                            return {done: true, value: count}
+                        }
+                    }
+                }
+            }
+        }
+        return t[Symbol.iterator]()
+    }
 }
+postMessage('result', Test);
 `)
-
-console.info('res is ', res)

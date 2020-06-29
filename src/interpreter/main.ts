@@ -13,7 +13,7 @@ import {
 } from "../Model/Message";
 import { Node, ESTree } from "../Model/Node";
 import { ClosureHandler, BaseClosure, CaseItem, ReturnStringClosure, SwitchCaseClosure } from '../Model/Closure'
-import { Break, Continue, DefaultCase, EmptyStatementReturn, GlobalScopeName, RootScopeName, SuperScopeName, WithScopeName, createSymbolFunc } from '../Model/Symbols'
+import { Break, Continue, DefaultCase, EmptyStatementReturn, GlobalScopeName, RootScopeName, SuperScopeName, WithScopeName, createSymbolFunc, isSymbol, storeKey } from '../Model/Symbols'
 import { BreakLabel, ContinueLabel, Return } from '../Model/TokenClass'
 import { isFunction } from '../util'
 
@@ -626,6 +626,10 @@ export class Interpreter extends ClosureHandler {
 
 
 	protected safeObjectGet(obj: any, key: any, node: Node) {
+		if(isSymbol(key)){
+            // 对于模拟的Symbol属性，实际存储在了一个特殊的key下面
+            return obj[storeKey(key)]
+        }
 		return obj[key];
 	}
 
