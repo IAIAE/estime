@@ -96,7 +96,7 @@ export function createArrayClass(Smbl):any {
         private __arr: Array<any>;
 
         constructor(len?: number) {
-            this.__arr = new Array(len)
+            this.__arr = len === undefined?(new Array):(new Array(len))
         }
         get length() {
             return this.__arr.length

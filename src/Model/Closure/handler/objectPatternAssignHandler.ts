@@ -53,7 +53,7 @@ export function objectPatternAssignHandler(this: Interpreter, node: {
                 }
             }else{
                 // let [first, second] = arr
-                return (data[name] = rightValue[copyIndex])
+                return (data[name] = rightValue.__getIndex(copyIndex))
             }
         }else{
             // ObjectPattern let {name, ...rest} = obj

@@ -16,8 +16,9 @@ export function arrayExpressionHandler(this:Interpreter,  node: ESTree.ArrayExpr
         }
     });
     return () => {
+        const MArray = this.globalScope.data['Array']
         const len = items.length;
-        let result:any = [];
+        let result:any = new MArray;
         for (let i = 0; i < len; i++) {
             const item = items[i];
             if(!item){
@@ -25,10 +26,16 @@ export function arrayExpressionHandler(this:Interpreter,  node: ESTree.ArrayExpr
             }else{
                 if(item.type == 'SpreadElement'){
                     let arr = item.closure()
-                    if(!Array.isArray(arr)){
+                    if(!Array.isArray(arr) && !MArray.isArray(arr)){
                         throw this.createInternalThrowError(Messages.NormalError, 'cannot spread, not an array type', node)
                     }
-                    result = result.concat(arr)
+                    if(arr instanceof MArray){
+                        result = result.concat(arr)
+                    }else{
+                        let _ = new MArray
+                        _.__arr = arr
+                        result = result.concat(_)
+                    }
                 }else{
                     result.push(item.closure())
                 }

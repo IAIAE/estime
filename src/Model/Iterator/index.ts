@@ -14,7 +14,12 @@ type IterReturn = {
 export class EIterator {
     option: {next: ()=>IterReturn}
     constructor(Smbl, option:{next:()=>IterReturn}){
-        this[Smbl.iterator] = ()=>this
+        Object.defineProperty(this, storeKey(Smbl.iterator), {
+            value: ()=>this,
+            writable: false,
+            configurable: true,
+            enumerable: false,
+        });
         this.option = option
     }
     next(){

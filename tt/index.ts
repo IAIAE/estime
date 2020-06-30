@@ -28,25 +28,8 @@ evt.on('data', val=>{
 
 
 let res = inter.evaluate(`
-class Test{
-    getIter(){
-        let count = 0;
-        let t = {
-            [Symbol.iterator]: function(){
-                return {
-                    next(){
-                        if(count<4){
-                            count++
-                            return {done: false, value: count}
-                        }else{
-                            return {done: true, value: count}
-                        }
-                    }
-                }
-            }
-        }
-        return t[Symbol.iterator]()
-    }
+let t = [1, 2, 3];
+for(let item of t.entries()){
+    console.info(item)
 }
-postMessage('result', Test);
 `)

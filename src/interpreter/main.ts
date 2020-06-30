@@ -16,6 +16,7 @@ import { ClosureHandler, BaseClosure, CaseItem, ReturnStringClosure, SwitchCaseC
 import { Break, Continue, DefaultCase, EmptyStatementReturn, GlobalScopeName, RootScopeName, SuperScopeName, WithScopeName, createSymbolFunc, isSymbol, storeKey } from '../Model/Symbols'
 import { BreakLabel, ContinueLabel, Return } from '../Model/TokenClass'
 import { isFunction } from '../util'
+import { createArrayClass } from '../Model/Array';
 
 const version = "%VERSION%";
 
@@ -214,7 +215,8 @@ const BuildInObjects: ScopeData = {
 	undefined,
 	// null,
 	Object,
-	Array,
+	// Array类是自定义的一个包装类，为了提供新特性的支持
+	// Array,
 	String,
 	Boolean,
 	Number,
@@ -258,9 +260,9 @@ if (typeof Map !== "undefined") {
 	BuildInObjects.Map = Map;
 }
 
-if (typeof Symbol !== "undefined") {
-	BuildInObjects.Symbol = Symbol;
-}
+// if (typeof Symbol !== "undefined") {
+// 	BuildInObjects.Symbol = Symbol;
+// }
 
 if (typeof Proxy !== "undefined") {
 	BuildInObjects.Proxy = Proxy;
@@ -366,7 +368,9 @@ export class Interpreter extends ClosureHandler {
 
 		this.globalScope = scope;
 		// 顶级作用域嵌入mock的Symbol方法。
-		this.globalScope.data['Symbol'] = createSymbolFunc()
+		let smbl;
+		this.globalScope.data['Symbol'] = smbl = createSymbolFunc()
+		this.globalScope.data['Array'] = createArrayClass(smbl)
 		this.currentScope = this.globalScope;
 		//init global context to this
 		this.globalContext = scope.data;

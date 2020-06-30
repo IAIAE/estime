@@ -26,12 +26,15 @@ export function assignmentExpressionHandler(this: Interpreter, node: ESTree.Assi
 
 
     return () => {
+        const MArray = this.globalScope.data['Array']
         // dataGetter执行时，判断如果是const且已经初始化，会报错
         const data = dataGetter();
         const name = nameGetter();
         let realName;
         if(isSymbol(name)){
             realName = storeKey(name)
+        }else{
+            realName = name
         }
         const rightValue = rightValueGetter();
         if (node.operator !== "=") {
@@ -39,7 +42,6 @@ export function assignmentExpressionHandler(this: Interpreter, node: ESTree.Assi
             // a += 1
             this.assertVariable(data, name, node);
         }
-
         switch (node.operator) {
             case "=":
                 if(isSymbol(name)){
@@ -51,33 +53,45 @@ export function assignmentExpressionHandler(this: Interpreter, node: ESTree.Assi
                     });
                     return rightValue
                 }else{
-                    return (data[name] = rightValue);
+                    return updateValue(MArray, data, realName, rightValue)
+                    // return (data[realName] = rightValue);
                 }
             case "+=":
-                return (data[name] += rightValue);
+                return updateValue(MArray, data, realName, data[realName] + rightValue)
+                // return (data[realName] += rightValue);
             case "-=":
-                return (data[name] -= rightValue);
+                return updateValue(MArray, data, realName, data[realName] - rightValue)
+                // return (data[realName] -= rightValue);
             case "*=":
-                return (data[name] *= rightValue);
+                return updateValue(MArray, data, realName, data[realName] * rightValue)
+                // return (data[realName] *= rightValue);
             // case "**=":
             // data[name]: Getter may be triggered
             // 	return (data[name] = Math.pow(data[name], rightValue));
             case "/=":
-                return (data[name] /= rightValue);
+                return updateValue(MArray, data, realName, data[realName] / rightValue)
+                // return (data[realName] /= rightValue);
             case "%=":
-                return (data[name] %= rightValue);
+                return updateValue(MArray, data, realName, data[realName] % rightValue)
+                // return (data[realName] %= rightValue);
             case "<<=":
-                return (data[name] <<= rightValue);
+                return updateValue(MArray, data, realName, data[realName] << rightValue)
+                // return (data[realName] <<= rightValue);
             case ">>=":
-                return (data[name] >>= rightValue);
+                return updateValue(MArray, data, realName, data[realName] >> rightValue)
+                // return (data[realName] >>= rightValue);
             case ">>>=":
-                return (data[name] >>>= rightValue);
+                return updateValue(MArray, data, realName, data[realName] >>> rightValue)
+                // return (data[realName] >>>= rightValue);
             case "&=":
-                return (data[name] &= rightValue);
+                return updateValue(MArray, data, realName, data[realName] & rightValue)
+                // return (data[realName] &= rightValue);
             case "^=":
-                return (data[name] ^= rightValue);
+                return updateValue(MArray, data, realName, data[realName] ^ rightValue)
+                // return (data[realName] ^= rightValue);
             case "|=":
-                return (data[name] |= rightValue);
+                return updateValue(MArray, data, realName, data[realName] | rightValue)
+                // return (data[realName] |= rightValue);
             default:
                 throw this.createInternalThrowError(
                     Messages.AssignmentExpressionSyntaxError,
@@ -86,4 +100,13 @@ export function assignmentExpressionHandler(this: Interpreter, node: ESTree.Assi
                 );
         }
     };
+}
+
+
+function updateValue(MArray, data, name, value){
+    if(MArray.isArray(data) && +name === name){
+        data.__setIndex(name, value)
+        return value
+    }
+    return (data[name] = value)
 }
