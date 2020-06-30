@@ -152,17 +152,38 @@ export function createArrayClass(Smbl):any {
 
         public copyWithin(...args) {
             if (!Array.prototype.copyWithin) {
-                // todo:
+                let target = args[0]
+                if(target==null || +target !== target){
+                    throw new TypeError('fist param of copyWithin must be number')
+                }
+                target = formatStart(target, this.length)
+                let start = formatStart(args[1], this.length)
+                let end = formatEnd(args[2], this.length)
+                if(target == this.length) return this
+                let arr = this.__arr.slice(start, end)
+                for(let i=0;i<arr.length;i++){
+                    if(target+i >= this.length) break;
+                    this.__arr[target+i] = arr[i]
+                }
+                return this
             } else {
-                return this.__nativeNewFunc('copyWithin', args)
+                this.__nativeNewFunc('copyWithin', args)
+                return this;
             }
         }
 
         public fill(...args) {
             if (!Array.prototype.fill) {
-                // todo:
+                let val = args[0]
+                let start = formatStart(args[1], this.length)
+                let end = formatEnd(args[2], this.length)
+                for(let i=start; i<end; i++){
+                    this.__arr[i] = val
+                }
+                return this
             } else {
-                return this.__nativeFunc('fill', args)
+                this.__nativeFunc('fill', args)
+                return this;
             }
         }
 
@@ -472,6 +493,27 @@ function* flatten(array, depth) {
             yield item;
         }
     }
+}
+
+
+function formatStart(start, len){
+    if(+start !== start){
+        throw new TypeError('parameter must be number')
+    }
+    if(start == null) return 0
+    else if(start < 0) return Math.max(0, len+start)
+    else return Math.min(len, start)
+}
+
+function formatEnd(end, len){
+    if(+end !== end){
+        throw new TypeError('parameter must be number')
+    }
+    if(end == null) return len
+    else if(end < 0) {
+        return len+end<0?len:(len+end)
+    }
+    else return Math.min(len, end)
 }
 
 /**
