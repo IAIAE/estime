@@ -114,9 +114,9 @@ export function objectExpressionHandler(this: Interpreter, node: ESTree.ObjectEx
             } else {
                 // spread object
                 let targetObj = item.spread!()
-                if(targetObj && MArray.isArray(targetObj)){
+                if(targetObj && Array.isArray(targetObj)){
                     for(let i=0;i<targetObj.length;i++){
-                        result[String(i)] = targetObj.__getIndex(i)
+                        result[String(i)] = targetObj[i]
                     }
                 }else if(targetObj && typeof targetObj === 'object'){
                     // 解构只解构本身的属性，且不会copy不能枚举的和setter，copy的getter也会转换为一个简单的property

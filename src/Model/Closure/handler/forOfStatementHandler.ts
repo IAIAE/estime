@@ -80,9 +80,9 @@ export function forOfStatementHandler(this: Interpreter, node: ESTree.ForOfState
                 if(t === 'break'){ break; }
                 val = iter.next()
             }
-        }else if(MArray.isArray(data)){
+        }else if(Array.isArray(data)){
             for(let i=0;i<data.length;i++){
-                let t = loopBody.call(this, _=>{result=_}, initLexDecl, newScope!, node, left, labelName, getBodyClosure, data.__getIndex(i))
+                let t = loopBody.call(this, _=>{result=_}, initLexDecl, newScope!, node, left, labelName, getBodyClosure, data[i])
                 if(t === 'break') {break;}
             }
         }else{

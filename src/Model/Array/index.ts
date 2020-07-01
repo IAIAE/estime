@@ -7,7 +7,9 @@ export function createArrayClass(Smbl):any {
      * 这个是对Array的封装
      * 为什么要这么做，请看issue：https://github.com/IAIAE/estime/issues/5
      */
-    class MyArray {
+    // @ts-ignore
+    class MyArray extends Array {
+
         static isArray(val: any) {
             return val instanceof MyArray
         }
@@ -77,9 +79,9 @@ export function createArrayClass(Smbl):any {
                 while (k < len) {
                     kValue = items[k];
                     if (mapFn) {
-                        A.__setIndex(k, typeof T === 'undefined' ? mapFn(kValue, k) : mapFn.call(T, kValue, k));
+                        A[k] = typeof T === 'undefined' ? mapFn(kValue, k) : mapFn.call(T, kValue, k);
                     } else {
-                        A.__setIndex(k, kValue);
+                        A[k] = kValue;
                     }
                     k += 1;
                 }
@@ -93,64 +95,26 @@ export function createArrayClass(Smbl):any {
             return MyArray.prototype.slice.call(arguments)
         }
 
-        private __arr: Array<any>;
+    }
 
-        constructor(len?: number) {
-            this.__arr = len === undefined?(new Array):(new Array(len))
-        }
-        get length() {
-            return this.__arr.length
-        }
-        set length(val) {
-            this.__arr.length = val
-        }
-
-
-        private __setIndex(ind: number, val: any) {
-            this.__arr[ind] = val
-        }
-        private __getIndex(ind: number) {
-            return this.__arr[ind]
-        }
-
-        public concat(...args) {
-            return this.__nativeNewFunc('concat', args)
-        }
-
-        /**
-         * 调用原生方法，创建一个新的数组，封装起来
-         * @param name
-         * @param args
-         */
-        private __nativeNewFunc(name: string, args) {
-            let t = new MyArray
-            t.__arr = this.__arr[name].apply(this.__arr, args.map(_ => {
-                if (_ instanceof MyArray) {
-                    return _.__arr
-                }
-                return _
-            }))
-            return t
-        }
-        /**
-         * 调用原生方法，不创建一个新的数组
-         * @param name
-         * @param args
-         */
-        private __nativeFunc(name: string, args) {
-            return this.__arr[name].apply(this.__arr, args.map(_ => {
-                if (_ instanceof MyArray) {
-                    return _.__arr
-                }
-                return _
-            }))
-        }
-
-        public slice(...args) {
-            return this.__nativeNewFunc('slice', args)
-        }
-
-        public copyWithin(...args) {
+    Object.defineProperty(MyArray.prototype, '__nativeNewFunc', {
+        value: function(name: string, args) {
+            return Array.prototype[name].apply(this, args)
+        },
+        enumerable: false,
+        configurable: true,
+        writable: false,
+    })
+    Object.defineProperty(MyArray.prototype, '__nativeFunc', {
+        value: function(name: string, args) {
+            return Array.prototype[name].apply(this, args)
+        },
+        enumerable: false,
+        configurable: true,
+        writable: false,
+    })
+    Object.defineProperty(MyArray.prototype, 'copyWithin', {
+        value: function(...args) {
             if (!Array.prototype.copyWithin) {
                 let target = args[0]
                 if(target==null || +target !== target){
@@ -160,47 +124,51 @@ export function createArrayClass(Smbl):any {
                 let start = formatStart(args[1], this.length)
                 let end = formatEnd(args[2], this.length)
                 if(target == this.length) return this
-                let arr = this.__arr.slice(start, end)
+                let arr = this.slice(start, end)
                 for(let i=0;i<arr.length;i++){
                     if(target+i >= this.length) break;
-                    this.__arr[target+i] = arr[i]
+                    this[target+i] = arr[i]
                 }
                 return this
             } else {
-                this.__nativeNewFunc('copyWithin', args)
-                return this;
+                return this.__nativeNewFunc('copyWithin', args)
             }
-        }
+        },
+        enumerable: false,
+        configurable: true,
+        writable: false,
+    })
 
-        public fill(...args) {
+    Object.defineProperty(MyArray.prototype, 'fill', {
+        value: function(...args) {
             if (!Array.prototype.fill) {
                 let val = args[0]
                 let start = formatStart(args[1], this.length)
                 let end = formatEnd(args[2], this.length)
                 for(let i=start; i<end; i++){
-                    this.__arr[i] = val
+                    this[i] = val
                 }
                 return this
             } else {
-                this.__nativeFunc('fill', args)
-                return this;
+                return this.__nativeFunc('fill', args)
             }
-        }
+        },
+        enumerable: false,
+        configurable: true,
+        writable: false,
+    })
 
-        /**
-         * 找到第一个匹配的元素
-         * @param args
-         */
-        public find(...args) {
+    Object.defineProperty(MyArray.prototype, 'find', {
+        value: function(...args) {
             if (!Array.prototype.find) {
                 let func = args[0]
                 if (typeof func != 'function') {
                     throw new TypeError(args[0] + ' is not a function')
                 }
                 let res;
-                for (let i = 0; i < this.__arr.length; i++) {
-                    if (func(this.__arr[i], i, this)) {
-                        res = this.__arr[i]
+                for (let i = 0; i < this.length; i++) {
+                    if (func(this[i], i, this)) {
+                        res = this[i]
                         break
                     }
                 }
@@ -208,21 +176,26 @@ export function createArrayClass(Smbl):any {
             } else {
                 return this.__nativeFunc('find', args)
             }
-        }
+        },
+        enumerable: false,
+        configurable: true,
+        writable: false,
+    })
 
-        /**
-         * 找到第一个匹配元素的下标
-         * @param args
-         */
-        public findIndex(...args) {
+    /**
+     * 找到第一个匹配元素的下标
+     * @param args
+     */
+    Object.defineProperty(MyArray.prototype, 'findIndex', {
+        value: function(...args) {
             if (!Array.prototype.findIndex) {
                 let func = args[0]
                 if (typeof func != 'function') {
                     throw new TypeError(func + ' is not a function')
                 }
                 let res = -1;
-                for (let i = 0; i < this.__arr.length; i++) {
-                    if (func(this.__arr[i], i, this)) {
+                for (let i = 0; i < this.length; i++) {
+                    if (func(this[i], i, this)) {
                         res = i
                         break
                     }
@@ -231,20 +204,25 @@ export function createArrayClass(Smbl):any {
             } else {
                 return this.__nativeFunc('findIndex', args)
             }
-        }
+        },
+        enumerable: false,
+        configurable: true,
+        writable: false,
+    })
 
-        /**
-         * 从后往前遍历，找到最后一个匹配元素的下标
-         * @param args
-         */
-        public lastIndexOf(...args) {
+    /**
+     * 从后往前遍历，找到最后一个匹配元素的下标
+     * @param args
+     */
+    Object.defineProperty(MyArray.prototype, 'lastIndexOf', {
+        value: function(...args) {
             if (!Array.prototype.lastIndexOf) {
                 let searchElement = args[0]
                 let fromIndex = args[2]
                 if (+fromIndex !== fromIndex) {
                     throw new TypeError(fromIndex + ' is not a number')
                 }
-                let len = this.__arr.length
+                let len = this.length
                 if (fromIndex >= 0) {
                     fromIndex = Math.min(len - 1, fromIndex)
                 } else {
@@ -253,7 +231,7 @@ export function createArrayClass(Smbl):any {
 
                 let res = -1;
                 for (let i = fromIndex; i >= 0; i--) {
-                    if (this.__arr[i] === searchElement) {
+                    if (this[i] === searchElement) {
                         res = i
                         break
                     }
@@ -262,54 +240,40 @@ export function createArrayClass(Smbl):any {
             } else {
                 return this.__nativeFunc('lastIndexOf', args)
             }
-        }
+        },
+        enumerable: false,
+        configurable: true,
+        writable: false,
+    })
 
-        public pop(...args) {
-            return this.__nativeFunc('pop', args)
-        }
 
-        public push(...args) {
-            return this.__nativeFunc('push', args)
-        }
-
-        public reverse() {
+    Object.defineProperty(MyArray.prototype, 'reverse', {
+        value: function() {
             if (!Array.prototype.reverse) {
                 let len = this.length
                 for (let i = 0; i < len - i; i++) {
-                    swithh(this.__arr, i, len - i)
+                    swithh(this, i, len - i)
                 }
                 return this
             } else {
                 this.__nativeFunc('reverse', [])
                 return this
             }
-        }
+        },
+        enumerable: false,
+        configurable: true,
+        writable: false,
+    })
 
-        public shift() {
-            return this.__nativeFunc('shift', [])
-        }
-
-        public unshift() {
-            return this.__nativeFunc('unshift', [])
-        }
-
-        public sort(...args) {
-            this.__nativeFunc('sort', args)
-            return this
-        }
-
-        public splice(...args) {
-            this.__nativeFunc('splice', args)
-        }
-
-        public includes(...args) {
+    Object.defineProperty(MyArray.prototype, 'includes', {
+        value: function(...args) {
             if (!Array.prototype.includes) {
                 let target = args[0]
                 let fromIndex = args[1]
                 let len = this.length
                 fromIndex = fromIndex >= 0 ? fromIndex : (len + fromIndex)
                 for (let i = fromIndex; i < len; i++) {
-                    if (this.__arr[i] === target) {
+                    if (this[i] === target) {
                         return true
                     }
                 }
@@ -317,21 +281,18 @@ export function createArrayClass(Smbl):any {
             } else {
                 return this.__nativeFunc('includes', args)
             }
-        }
+        },
+        enumerable: false,
+        configurable: true,
+        writable: false,
+    })
 
-        public indexOf(...args) {
-            return this.__nativeFunc('indexOf', args)
-        }
-
-        public join(...args) {
-            return this.__nativeFunc('join', args)
-        }
-
-        /**
-         * 对于keys的调用是没有参数的，但是沙箱内部会传入一个当前环境的Symbol构造类进来。
-         * @param Smbl
-         */
-        public keys() {
+    /**
+     * 对于keys的调用是没有参数的，但是沙箱内部会传入一个当前环境的Symbol构造类进来。
+     * @param Smbl
+     */
+    Object.defineProperty(MyArray.prototype, 'keys', {
+        value: function() {
             const Smbl = MyArray._Smbl
             let len = this.length
             let count = 0
@@ -344,15 +305,20 @@ export function createArrayClass(Smbl):any {
                     }
                 }
             })
-        }
+        },
+        enumerable: false,
+        configurable: true,
+        writable: false,
+    })
 
-        /**
-         * 对于entries的调用是没有参数的，但是沙箱内部会传入一个当前环境的Symbol构造类进来。
-         * @param Smbl
-         */
-        public entries() {
+    /**
+     * 对于entries的调用是没有参数的，但是沙箱内部会传入一个当前环境的Symbol构造类进来。
+     * @param Smbl
+     */
+    Object.defineProperty(MyArray.prototype, 'entries', {
+        value: function() {
             const Smbl = MyArray._Smbl
-            let arr = this.__arr.map(_ => _)
+            let arr = this.map(_ => _)
             let len = this.length
             let count = 0
             return new EIterator(Smbl, {
@@ -364,11 +330,16 @@ export function createArrayClass(Smbl):any {
                     }
                 }
             })
-        }
+        },
+        enumerable: false,
+        configurable: true,
+        writable: false,
+    })
 
-        public values() {
+    Object.defineProperty(MyArray.prototype, 'values', {
+        value: function() {
             const Smbl = MyArray._Smbl
-            let arr = this.__arr.map(_ => _)
+            let arr = this.map(_ => _)
             let len = this.length
             let count = 0
             return new EIterator(Smbl, {
@@ -380,17 +351,14 @@ export function createArrayClass(Smbl):any {
                     }
                 }
             })
-        }
+        },
+        enumerable: false,
+        configurable: true,
+        writable: false,
+    })
 
-        public forEach(...args) {
-            return this.__nativeFunc('forEach', args)
-        }
-
-        public filter(...args) {
-            return this.__nativeFunc('filter', args)
-        }
-
-        public flat(...args) {
+    Object.defineProperty(MyArray.prototype, 'flat', {
+        value: function(...args) {
             // @ts-ignore
             if (!Array.prototype.flat) {
                 let depth = args[0]
@@ -400,46 +368,46 @@ export function createArrayClass(Smbl):any {
                 if (+depth !== depth) {
                     throw new TypeError('first parameter of Array.prototype.flat must be number')
                 }
-                let t = new MyArray
-                t.__arr = [...flatten(this.__arr, depth)]
-                return t;
+                let tt = new MyArray
+                let t = [...flatten(this, depth)]
+                for(let i=0;i<t.length;i++){
+                    tt[i] = t[i]
+                }
+                return tt;
             } else {
                 return this.__nativeNewFunc('flat', args)
             }
-        }
+        },
+        enumerable: false,
+        configurable: true,
+        writable: false,
+    })
 
-        public flatMap(...args) {
+    Object.defineProperty(MyArray.prototype, 'flatMap', {
+        value: function(...args) {
             // @ts-ignore
             if (!Array.prototype.flatMap) {
                 let func = args[0]
                 if (typeof func != 'function') {
                     throw new TypeError('first parameter of Array.prototype.flatMap must be function')
                 }
-                let t = new MyArray
-                t.__arr = [...flatten(this.__arr.map(func), 1)]
-                return t;
+                let tt = new MyArray
+                let t = [...flatten(this.map(func), 1)]
+                for(let i=0;i<t.length;i++){
+                    tt[i] = t[i]
+                }
+                return tt;
             } else {
                 return this.__nativeNewFunc('flatMap', args)
             }
-        }
+        },
+        enumerable: false,
+        configurable: true,
+        writable: false,
+    })
 
-        public map(...args) {
-            return this.__nativeNewFunc('map', args)
-        }
-
-        public every(...args) {
-            return this.__nativeFunc('every', args)
-        }
-
-        public some(...args) {
-            return this.__nativeFunc('some', args)
-        }
-
-        public reduce(...args) {
-            return this.__nativeFunc('reduce', args)
-        }
-
-        public reduceRight(...args) {
+    Object.defineProperty(MyArray.prototype, 'reduceRight', {
+        value: function(...args) {
             if (!Array.prototype.reduceRight) {
                 let func = args[0]
                 if (typeof func != 'function') {
@@ -451,33 +419,97 @@ export function createArrayClass(Smbl):any {
                     if (this.length == 0) {
                         throw new TypeError('calling reduceRight on an empty array without an initial value')
                     }
-                    initialValue = this.__arr[this.length - 1]
+                    initialValue = this[this.length - 1]
                     startIndex--
                 }
                 for (let i = startIndex; i >= 0; i--) {
-                    initialValue = func(initialValue, this.__arr[i], i, this)
+                    initialValue = func(initialValue, this[i], i, this)
                 }
                 return initialValue
             } else {
                 return this.__nativeNewFunc('reduceRight', args)
             }
-        }
+        },
+        enumerable: false,
+        configurable: true,
+        writable: false,
+    })
 
-        public toString() {
-            return this.__arr.join(',')
-        }
 
-        public toLocaleString() {
-            return this.toString()
-        }
+    // Object.defineProperty(MyArray.prototype, 'concat', {
+    //     enumerable: false,
+    //     value: function(...args) {
+    //         return this.__nativeNewFunc('concat', args)
+    //     }
+    // })
+    // protected pop(...args) {
+    //     return this.__nativeFunc('pop', args)
+    // }
 
-    }
+    // protected push(...args) {
+    //     return this.__nativeFunc('push', args)
+    // }
+    // protected slice(...args) {
+    //     return this.__nativeNewFunc('slice', args)
+    // }
+    // protected shift() {
+    //     return this.__nativeFunc('shift', [])
+    // }
+
+    // protected unshift() {
+    //     return this.__nativeFunc('unshift', [])
+    // }
+
+    // protected sort(...args) {
+    //     return this.__nativeFunc('sort', args)
+    // }
+
+    // protected splice(...args) {
+    //     return this.__nativeFunc('splice', args)
+    // }
+    // protected indexOf(...args) {
+    //     return this.__nativeFunc('indexOf', args)
+    // }
+
+    // protected join(...args) {
+    //     return this.__nativeFunc('join', args)
+    // }
+    // protected forEach(...args) {
+    //     return this.__nativeFunc('forEach', args)
+    // }
+
+    // protected filter(...args) {
+    //     return this.__nativeFunc('filter', args)
+    // }
+    // protected map(...args) {
+    //     return this.__nativeNewFunc('map', args)
+    // }
+
+    // protected every(...args) {
+    //     return this.__nativeFunc('every', args)
+    // }
+
+    // protected some(...args) {
+    //     return this.__nativeFunc('some', args)
+    // }
+
+    // protected reduce(...args) {
+    //     return this.__nativeFunc('reduce', args)
+    // }
+    // protected toString() {
+    //     return this.join(',')
+    // }
+
+    // protected toLocaleString() {
+    //     return this.join(',')
+    // }
+
     MyArray._setSmbl(Smbl)
+
+
     return MyArray
 
 }
-
-
 
 function swithh(arr, i, j) {
     let t = arr[i]

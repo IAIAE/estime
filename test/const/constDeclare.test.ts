@@ -137,8 +137,7 @@ test("ConstDeclaration-6", () => {
     let res;
     let inter = new Interpreter({
         rt: (val)=>{res = val},
-    }, {
-        ecmaVersion: 2015,
+        console,
     })
 	inter.evaluate( `
 try{
@@ -151,6 +150,8 @@ try{
     rt(123)
 }
 `);
+
+console.info('the res is ', res)
 	expect(res).toEqual(0+1+2);
 });
 

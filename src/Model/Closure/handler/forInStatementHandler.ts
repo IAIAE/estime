@@ -70,6 +70,7 @@ export function forInStatementHandler(this: Interpreter, node: ESTree.ForInState
         const data = rightClosure();
 
         for (x in data) {
+            if(Array.isArray(data) && x == 'constructor'){ continue }
 
             if(initLexDecl){
                 // 将所有声明变量的初始化改为false，重新赋值

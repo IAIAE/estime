@@ -104,9 +104,5 @@ export function assignmentExpressionHandler(this: Interpreter, node: ESTree.Assi
 
 
 function updateValue(MArray, data, name, value){
-    if(MArray.isArray(data) && +name === name){
-        data.__setIndex(name, value)
-        return value
-    }
     return (data[name] = value)
 }

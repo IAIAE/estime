@@ -346,6 +346,22 @@ es2015\es2017等等申明，个人感觉是非严格的es规范支持声明。es
 - [x] Template Strings
 - [x] Computed property
 - [x] Symbols
+- [x] Array新增方法等
+  - [x] Array.from
+  - [x] Array.of
+  - [x] Array.prototype.entries
+  - [x] Array.prototype.values
+  - [x] Array.prototype.keys
+  - [x] Array.prototype.reverse
+  - [x] Array.prototype.find
+  - [x] Array.prototype.fill
+  - [x] Array.prototype.lastIndexOf
+  - [x] Array.prototype.findIndex
+  - [x] Array.prototype.copyWithin
+  - [x] Array.prototype.includes
+  - [x] Array.prototype.flat
+  - [x] Array.prototype.flatMap
+  - [x] Array.prototype.reduceRight
 - [ ] Promises
 - [ ] Generators
 - [ ] async/await

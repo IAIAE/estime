@@ -26,16 +26,10 @@ export function arrayExpressionHandler(this:Interpreter,  node: ESTree.ArrayExpr
             }else{
                 if(item.type == 'SpreadElement'){
                     let arr = item.closure()
-                    if(!Array.isArray(arr) && !MArray.isArray(arr)){
+                    if(!Array.isArray(arr)){
                         throw this.createInternalThrowError(Messages.NormalError, 'cannot spread, not an array type', node)
                     }
-                    if(arr instanceof MArray){
-                        result = result.concat(arr)
-                    }else{
-                        let _ = new MArray
-                        _.__arr = arr
-                        result = result.concat(_)
-                    }
+                    result = result.concat(arr)
                 }else{
                     result.push(item.closure())
                 }

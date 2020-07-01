@@ -18,9 +18,6 @@ export function memberExpressionHandler(this: Interpreter, node: ESTree.MemberEx
             return obj[storeKey(key)]
         }
         // arr[1]
-        if(MArray.isArray(obj) && +key===key){
-            return obj.__getIndex(key)
-        }
         return obj[key];
     };
 }
