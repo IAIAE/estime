@@ -1,6 +1,5 @@
 const webpack = require("webpack");
 const pkg = require("./package.json");
-const { getBannerTemplate } = require("./scripts/banner");
 
 module.exports = function(opts) {
 	const isProd = opts.program.state === "prod";
@@ -14,11 +13,11 @@ module.exports = function(opts) {
 		output: {
 			globalObject: "this",
 			libraryTarget: "umd",
-			library: "eval5",
+			library: "estime",
 		},
 		assest: {
 			js: {
-				name: isProd ? "eval5.min.js" : "eval5.js",
+				name: isProd ? "estime.min.js" : "estime.js",
 				output: "",
 			},
 		},
@@ -44,11 +43,5 @@ module.exports = function(opts) {
 				],
 			],
 		},
-		pluginExtra: [
-			new webpack.BannerPlugin({
-				banner: getBannerTemplate(),
-				raw: true,
-			}),
-		],
 	};
 };

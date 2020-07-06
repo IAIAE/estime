@@ -1,9 +1,5 @@
 import Scope, { ScopeData, createScope } from '../Model/Scope'
 import { Parser } from "acorn";
-let MyParser = Parser.extend(
-	require('acorn-class-fields'),
-	require('acorn-static-class-features'),
-)
 import {
 	Messages,
 	MessageItem,
@@ -17,6 +13,11 @@ import { Break, Continue, DefaultCase, EmptyStatementReturn, GlobalScopeName, Ro
 import { BreakLabel, ContinueLabel, Return } from '../Model/TokenClass'
 import { isFunction } from '../util'
 import { createArrayClass } from '../Model/Array';
+
+let MyParser = Parser.extend(
+	require('acorn-class-fields'),
+	require('acorn-static-class-features'),
+)
 
 const version = "%VERSION%";
 

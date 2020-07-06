@@ -7,14 +7,13 @@
 	"types": "./lib/index.d.ts",
 	"scripts": {
 		"start": "tsc -w",
-		"build": "run-s clear build:* bundle:dev bundle:prod bundle:banner",
+		"build": "run-s clear build:* bundle:dev bundle:prod",
 		"build:lib": "tsc",
 		"build:cjs": "babel lib --config-file=./babel.config.js  --out-dir dist/cjs",
 		"build:esm": "babel lib --config-file=./babel.config.esm.js  --out-dir dist/esm",
 		"clear": "rimraf lib dist umd",
 		"bundle:dev": "packez bundle ./src/index.ts -d umd -c",
 		"bundle:prod": "packez bundle ./src/index.ts -d umd --state prod",
-		"bundle:banner": "node scripts/banner.js",
 		"test": "jest"
 	},
 	"repository": {
