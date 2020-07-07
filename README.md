@@ -23,7 +23,9 @@ ES5\es2015(doing)\JSX(doing)
 
 ## 安装
 
-todo:
+```shell
+npm i estime -S
+```
 
 ## 使用
 
@@ -275,6 +277,63 @@ let t = <div>
   {...content}
 </div>
 ```
+
+### jsx使用例子：
+
+```typescript
+let code = `
+let props = {
+   style: { border: '1px solid #333', color: 'red', borderRadius: 3, padding: 10, margin: 10 }
+}
+
+class Panel extends React.Component{
+   render(){
+       return <div {...props}>this is other Component: Panel</div>
+   }
+}
+class TT extends React.Component{
+  render(){
+    return <div {...props}>
+      hello world
+      <input disabled style={{display: 'block', width: 300,}} />
+      <Panel />
+    </div>
+  }
+}
+__rt(TT)
+`
+class Test {
+  getCpt(code){
+    let interRes;
+    let inter = new Interpreter({
+      __rt: val => (interRes = val),
+      console,
+      React: React,
+    })
+    try{
+      inter.evaluate(code)
+    }catch(e){
+      console.info(e)
+      return e.message
+    }
+    return interRes
+  }
+  render(){
+    let C = this.state.C
+    return <div>
+      <button onClick={_=>{
+        let Cpt = this.getCpt(code)
+        this.setState({
+          C: Cpt
+        })
+      }}>点击生成组件</button>
+      {C && <div><C/></div>}
+    </div>
+  }
+}
+```
+效果如下：
+![](https://github.com/IAIAE/estime/tree/master/docs/img/jsx-demo.gif)
 
 ## License
 Mozilla Public License Version 2.0
