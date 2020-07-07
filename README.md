@@ -265,8 +265,16 @@ console.info(res)  // 123
 ```
 
 ## JSX支持
-todo:
-
+其中不支持JSXFragments、JSXNamespacedName和JSXSpreadChild。JSX标准参考[fb的jsx specification](https://facebook.github.io/jsx/)
+acorn-jsx不支持JSXSpreadChild，且用的比较少。例如下面两种content的用法，效果是一样的，为什么要我要去用spread呢？暂且不支持吧。
+jsx
+```typescript
+let content = [1,2,3]
+let t = <div>
+  {content}
+  {...content}
+</div>
+```
 
 ## License
 Mozilla Public License Version 2.0
@@ -365,4 +373,9 @@ es2015\es2017等等申明，个人感觉是非严格的es规范支持声明。es
 - [ ] Promises
 - [ ] Generators
 - [ ] async/await
-- [ ] JSX支持
+- [x] JSX支持，其中不支持JSXFragments、JSXNamespacedName和JSXSpreadChild。JSX标准参考[fb的jsx specification](https://facebook.github.io/jsx/)
+  - [x] JSXElement
+  - [x] JSXIdentifier for React IntrinsicElement
+  - [x] SelfClosing
+  - [x] JSXExpressionContainer
+  - [x] JSXText

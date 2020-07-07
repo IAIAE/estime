@@ -59,6 +59,13 @@ export class ClosureHandler {
 	templateLiteralHandler = handler.templateLiteralHandler
 	classDeclarationHandler = handler.classDeclarationHandler
 	classExpressionHandler = handler.classExpressionHandler
+	JSXElementHandler = handler.JSXElementHandler
+	JSXMemberExpressionHandler = handler.JSXMemberExpressionHandler
+	JSXExpressionContainerHandler = handler.JSXExpressionContainerHandler
+	JSXTextHandler = handler.JSXTextHandler
+	JSXIdentifierHandler = handler.JSXIdentifierHandler
+	JSXAttributeHandler = handler.JSXAttributeHandler
+	JSXSpreadAttributeHandler = handler.JSXSpreadAttributeHandler
 
     protected getClosure(this: Interpreter, node: Node): BaseClosure|null {
 		let closure: BaseClosure|null = null;
@@ -197,6 +204,33 @@ export class ClosureHandler {
 				break;
 			case "DebuggerStatement":
 				closure = this.debuggerStatementHandler(node);
+				break;
+			case "JSXElement":
+				closure = this.JSXElementHandler(node);
+				break;
+			case "JSXExpressionContainer":
+				closure = this.JSXExpressionContainerHandler(node);
+				break;
+			case "JSXIdentifier":
+				closure = this.JSXIdentifierHandler(node)
+				break;
+			case "JSXAttribute":
+				closure = this.JSXAttributeHandler(node)
+				break;
+			case "JSXSpreadAttribute":
+				closure = this.JSXSpreadAttributeHandler(node)
+				break;
+			case "JSXMemberExpression":
+				closure = this.JSXMemberExpressionHandler(node)
+				break;
+			case "JSXOpeningElement":
+				// 在jsxelement就处理了，不可能到这里
+				break;
+			case "JSXText":
+				closure = this.JSXTextHandler(node)
+				break;
+			case "JSXEmptyExpression":
+				closure = () => null
 				break;
 			default:
 				break;

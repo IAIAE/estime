@@ -1,5 +1,5 @@
 import * as ESTree from "estree";
-
+import * as jsx from 'estree-jsx'
 export { ESTree };
 
 export type Node =
@@ -40,4 +40,23 @@ export type Node =
 	| ESTree.SwitchStatement
 	| ESTree.SwitchCase
 	| ESTree.LabeledStatement
-	| ESTree.DebuggerStatement;
+	| ESTree.DebuggerStatement
+	| jsx.JSXElement
+	| jsx.JSXExpressionContainer
+	| jsx.JSXIdentifier
+	| JSXMemberExpression
+	| jsx.JSXOpeningElement
+	| jsx.JSXSpreadAttribute
+	| jsx.JSXText
+	| jsx.JSXAttribute
+	| jsx.JSXEmptyExpression
+
+/**
+ * 官方库偷懒，只能自己声明一遍
+ */
+export interface JSXMemberExpression extends jsx.JSXMemberExpression {
+	start?: number
+	end?: number
+	object: jsx.JSXIdentifier | JSXMemberExpression
+	property: jsx.JSXIdentifier
+}

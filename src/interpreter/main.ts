@@ -17,6 +17,7 @@ import { createArrayClass } from '../Model/Array';
 let MyParser = Parser.extend(
 	require('acorn-class-fields'),
 	require('acorn-static-class-features'),
+	require('acorn-jsx')(),
 )
 
 const version = "%VERSION%";
@@ -602,7 +603,7 @@ export class Interpreter extends ClosureHandler {
 	}
 
 
-	protected createClosure(node: ESTree.Node): BaseClosure {
+	protected createClosure(node: Node): BaseClosure {
 		let closure = this.getClosure(node)
 		if (!closure) {
 			throw this.createInternalThrowError(Messages.NodeTypeSyntaxError, node.type, node);
