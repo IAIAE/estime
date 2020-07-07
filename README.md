@@ -333,7 +333,8 @@ class Test {
 }
 ```
 效果如下：
-![](https://github.com/IAIAE/estime/tree/master/docs/img/jsx-demo.gif)
+
+<img src="https://raw.githubusercontent.com/IAIAE/estime/master/docs/img/jsx-demo.gif" width="400" />
 
 ## License
 Mozilla Public License Version 2.0
