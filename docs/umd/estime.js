@@ -8978,6 +8978,10 @@ Object.defineProperty(exports, "__esModule", {
 
 var Message_1 = __webpack_require__(/*! ../../Message */ "./src/Model/Message/index.ts");
 
+var Scope_1 = __webpack_require__(/*! ../../Scope */ "./src/Model/Scope/index.ts");
+
+var Symbols_1 = __webpack_require__(/*! ../../Symbols */ "./src/Model/Symbols/index.ts");
+
 var _extendStatics = function extendStatics(d, b) {
   _extendStatics = Object.setPrototypeOf || {
     __proto__: []
@@ -9017,6 +9021,7 @@ function classExpressionHandler(node) {
     fieldsProperty: [],
     method: []
   };
+  var superClass = node.superClass ? this.createClosure(node.superClass) : null;
   node.body.body.forEach(function (item) {
     if (item.type === 'MethodDefinition') {
       // 关注3个属性：kind\static\computed
@@ -9063,18 +9068,36 @@ function classExpressionHandler(node) {
       throw _this2.createInternalThrowError(Message_1.Messages.NormalError, 'unknown class body type ' + item.type, node.body);
     }
   });
-  var superClass = node.superClass ? this.createClosure(node.superClass) : null;
   return function () {
     var self = _this2;
 
     var _super = superClass ? superClass() : null;
 
-    var cons = classDecl.cons ? classDecl.cons() : null;
+    var cons; // 如果存在父类，并且有显示的constructor声明时，构建构造方法的时候要注入super变量
+
+    if (_super && classDecl.cons) {
+      var newScope = Scope_1.createScope(_this2.getCurrentScope(), "FScope(constructor)", 'block');
+      newScope.lexDeclared = {
+        super: {
+          kind: 'const',
+          init: true
+        }
+      };
+      newScope.data['super'] = _super;
+
+      var prevScope = _this2.entryBlockScope(newScope);
+
+      cons = classDecl.cons();
+
+      _this2.setCurrentScope(prevScope);
+    } else {
+      cons = classDecl.cons ? classDecl.cons() : null;
+    }
 
     var func = function func() {
       var _this = this;
 
-      if (superClass) {
+      if (superClass && !cons) {
         _this = _super.call(_this) || _this;
       } // 先绑定field属性，再执行constructor
 
@@ -9087,10 +9110,10 @@ function classExpressionHandler(node) {
         var fn = item.value(); // @ts-ignore
 
         self.setCurrentContext(prev);
-        _this[item.name.computed ? item.name.value() : item.name.value] = fn;
+        setKeyVal(_this, item, fn); // _this[item.name.computed?(item.name.value as BaseClosure)():item.name.value] = fn
       });
       classDecl.fieldsProperty.forEach(function (item) {
-        _this[item.name.computed ? item.name.value() : item.name.value] = item.value();
+        setKeyVal(_this, item, item.value()); // _this[item.name.computed?(item.name.value as BaseClosure)():item.name.value] = item.value()
       });
 
       if (cons) {
@@ -9122,6 +9145,35 @@ function classExpressionHandler(node) {
 }
 
 exports.classExpressionHandler = classExpressionHandler;
+
+function setKeyVal(_this, item, val) {
+  var keyval;
+  var sbl = false;
+
+  if (item.name.computed) {
+    var t = item.name.value();
+
+    if (Symbols_1.isSymbol(t)) {
+      sbl = true;
+      keyval = Symbols_1.storeKey(t);
+    } else {
+      keyval = t;
+    }
+  } else {
+    keyval = item.name.value;
+  }
+
+  if (sbl) {
+    Object.defineProperty(_this, keyval, {
+      value: val,
+      writable: true,
+      enumerable: false,
+      configurable: true
+    });
+  } else {
+    _this[keyval] = val;
+  }
+}
 
 /***/ }),
 
@@ -10279,6 +10331,8 @@ __export(__webpack_require__(/*! ./JSXAttributeHandler */ "./src/Model/Closure/h
 
 __export(__webpack_require__(/*! ./JSXSpreadAttributeHandler */ "./src/Model/Closure/handler/JSXSpreadAttributeHandler.ts"));
 
+__export(__webpack_require__(/*! ./superHandler */ "./src/Model/Closure/handler/superHandler.ts"));
+
 /***/ }),
 
 /***/ "./src/Model/Closure/handler/labeledStatementHandler.ts":
@@ -10912,6 +10966,39 @@ function spreadElementHandler(node) {
 }
 
 exports.spreadElementHandler = spreadElementHandler;
+
+/***/ }),
+
+/***/ "./src/Model/Closure/handler/superHandler.ts":
+/*!***************************************************!*\
+  !*** ./src/Model/Closure/handler/superHandler.ts ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+}); // super()
+
+function superHandler(node) {
+  var _this = this;
+
+  return function () {
+    var currentScope = _this.getCurrentScope();
+
+    var data = _this.getScopeDataFromName('super', currentScope); // todo: 其实还要验证是否是自己的super，因为作用域链向上找，可能找到上级的和自己完全不相关的super变量，这种情况不多，先暂缓修复
+
+
+    _this.assertVariable(data, 'super', node);
+
+    return data['super'];
+  };
+}
+
+exports.superHandler = superHandler;
 
 /***/ }),
 
@@ -11732,6 +11819,7 @@ function () {
     this.JSXIdentifierHandler = handler.JSXIdentifierHandler;
     this.JSXAttributeHandler = handler.JSXAttributeHandler;
     this.JSXSpreadAttributeHandler = handler.JSXSpreadAttributeHandler;
+    this.superHandler = handler.superHandler;
   }
 
   var _proto = ClosureHandler.prototype;
@@ -11746,6 +11834,10 @@ function () {
 
       case 'ClassExpression':
         closure = this.classExpressionHandler(node);
+        break;
+
+      case 'Super':
+        closure = this.superHandler(node);
         break;
 
       case "BinaryExpression":
@@ -12482,7 +12574,7 @@ var util_1 = __webpack_require__(/*! ../util */ "./src/util/index.ts");
 var Array_1 = __webpack_require__(/*! ../Model/Array */ "./src/Model/Array/index.ts");
 
 var MyParser = acorn_1.Parser.extend(__webpack_require__(/*! acorn-class-fields */ "./node_modules/acorn-class-fields/index.js"), __webpack_require__(/*! acorn-static-class-features */ "./node_modules/acorn-static-class-features/index.js"), __webpack_require__(/*! acorn-jsx */ "./node_modules/acorn-jsx/index.js")());
-var version = "1.1.0";
+var version = "1.1.1";
 
 function internalFunction(reflection) {
   if (!(reflection instanceof InternalInterpreterReflection)) {
@@ -12969,6 +13061,7 @@ function (_Closure_1$ClosureHan) {
     var closure = this.getClosure(node);
 
     if (!closure) {
+      console.info('====> ', node);
       throw this.createInternalThrowError(Message_1.Messages.NodeTypeSyntaxError, node.type, node);
     }
 
