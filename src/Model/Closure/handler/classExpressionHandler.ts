@@ -6,6 +6,7 @@ import { Interpreter } from '../../../interpreter/main'
 import { createScope } from '../../Scope'
 import { Return } from '../../TokenClass'
 import { defineFunctionName } from '../../../util'
+import { isSymbol, storeKey } from "../../Symbols";
 
 
 let extendStatics = function (d, b) {
@@ -54,6 +55,7 @@ export function classExpressionHandler(
         fieldsProperty: [],
         method: [],
     }
+    let superClass = node.superClass?this.createClosure(node.superClass):null
     node.body.body.forEach(item=>{
         if(item.type === 'MethodDefinition'){
             // 关注3个属性：kind\static\computed
@@ -100,15 +102,32 @@ export function classExpressionHandler(
             throw this.createInternalThrowError(Messages.NormalError, 'unknown class body type '+item.type, node.body)
         }
     })
-    let superClass = node.superClass?this.createClosure(node.superClass):null
+
 
     return () => {
         let self = this;
         let _super = superClass?superClass():null
-        let cons = classDecl.cons?classDecl.cons():null
+        let cons:any;
+        // 如果存在父类，并且有显示的constructor声明时，构建构造方法的时候要注入super变量
+        if(_super && classDecl.cons){
+            let newScope = createScope(this.getCurrentScope(), `FScope(constructor)`, 'block')
+            newScope.lexDeclared = {
+                super: {
+                    kind: 'const',
+                    init: true
+                }
+            }
+            newScope.data['super'] = _super
+            let prevScope = this.entryBlockScope(newScope)
+            cons = classDecl.cons()
+            this.setCurrentScope(prevScope)
+        }else{
+            cons = classDecl.cons?classDecl.cons():null
+        }
+
         let func = function(){
             let _this = this
-            if(superClass){
+            if(superClass && !cons){
                 _this = _super.call(_this) || _this
             }
             // 先绑定field属性，再执行constructor
@@ -120,12 +139,13 @@ export function classExpressionHandler(
                 let fn = item.value()
                 // @ts-ignore
                 self.setCurrentContext(prev)
-
-                _this[item.name.computed?(item.name.value as BaseClosure)():item.name.value] = fn
+                setKeyVal(_this, item, fn)
+                // _this[item.name.computed?(item.name.value as BaseClosure)():item.name.value] = fn
             })
 
             classDecl.fieldsProperty.forEach(item=>{
-                _this[item.name.computed?(item.name.value as BaseClosure)():item.name.value] = item.value()
+                setKeyVal(_this, item, item.value())
+                // _this[item.name.computed?(item.name.value as BaseClosure)():item.name.value] = item.value()
             })
             if(cons){
                 cons.apply(_this, arguments)
@@ -150,4 +170,31 @@ export function classExpressionHandler(
         }
         return func
     };
+}
+
+
+function setKeyVal(_this, item, val){
+    let keyval;
+    let sbl = false
+    if(item.name.computed){
+        let t = (item.name.value as BaseClosure)()
+        if(isSymbol(t)){
+            sbl = true
+            keyval = storeKey(t)
+        }else{
+            keyval = t
+        }
+    }else{
+        keyval = item.name.value
+    }
+    if(sbl){
+        Object.defineProperty(_this, keyval, {
+            value: val,
+            writable: true,
+            enumerable: false,
+            configurable: true,
+        });
+    }else{
+        _this[keyval] = val
+    }
 }

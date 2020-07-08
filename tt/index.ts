@@ -13,20 +13,30 @@ let inter = new Interpreter({
 })
 
 inter.evaluate( `
-let t = {
-    style: {width: 100}
+const arr = ['hello', 'world', 'estime']
+const FOO = Symbol('foo')
+class T {
+    constructor(){
+        console.info('cons in T')
+    }
 }
-let style = {
-    some: 'hadsfa'
+class Test extends T{
+    constructor(){
+        super()
+        console.info('cons in Test')
+    }
+    name = 'default_test';
+    setName = (name) => {
+        this.name = name
+    }
+    [FOO] = 'bar'
+    show(){
+        for(let i of arr.entries()){
+            console.info(i)
+        }
+    }
 }
-let content = [1,2,3]
-let App = () => 'app'
-let ele = <div style={t.style}>
-    "hello"
-    {content}
-    <div show {...t} className={style.some}>world</div>
-    <App />
-</div>
-rt(ele)
+let t = new Test
+console.info('t.foo is ==> ', t[FOO])   // bar
 `);
 console.info('res ', res)

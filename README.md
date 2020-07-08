@@ -12,6 +12,9 @@ estime = ecmascript + runtime, in javascipt(es5) environment
 -   需要代码动态更新的场景。例如你的React应用需要热更新组件；你的规则系统需要动态下发规则脚本等等。
 -   研究/学习用
 
+## [功能演示](https://iaiae.github.io/estime/)
+
+
 ## 安装
 
 ```shell

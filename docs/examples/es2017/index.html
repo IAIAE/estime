@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>estime basic demo</title>
+    <link rel="stylesheet" href="../../util/codemirror/lib/codemirror.css">
+    <style>
+        body {
+            background-color: #f5f5f5;
+        }
+        #back{
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 80px;
+            height: 37px;
+            line-height: 37px;
+            border-radius: 3px;
+            background-color: white;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid #ddd;
+        }
+        .CodeMirror{
+            height: 400px !important;
+        }
+        .button{
+            width: 80px;
+            height: 37px;
+            line-height: 37px;
+            border-radius: 3px;
+            background-color: white;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid #ddd;
+        }
+        .content{
+            width: 80%;
+            overflow: hidden;
+            padding: 10px;
+            margin: 30px auto;
+            background-color: #fff;
+            border: 1px solid #efefef;
+            border-radius: 3px;
+        }
+        #code{
+            width: 600px;
+            height: 400px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+    </style>
+    <script src="../../util/codemirror/lib/codemirror.js"></script>
+    <script src="../../util/codemirror/mode/javascript/javascript.js"></script>
+    <script src="../../util/codemirror/mode/xml/xml.js"></script>
+    <script src="../../util/codemirror/mode/jsx/jsx.js"></script>
+</head>
+<body>
+    <div id="back"  > « 返回 </div>
+    <div class="content">
+        <div id="code"></div>
+        <div>
+            <div id="run" class="button">执行</div>
+        </div>
+        <div style="margin-bottom: 10px;">
+            <div style="margin-top: 10px;">console:</div>
+            <div id="console" style="padding: 10px; margin: 10px;border: 1px solid #ddd;border-radius: 3px;"></div>
+        </div>
+    </div>
+    <script src="../../umd/estime.min.js"></script>
+    <script>
+        document.getElementById('back').addEventListener('click', function(){
+            location.href = '/estime'
+        })
+
+        let code = `
+const arr = ['hello', 'world', 'estime']
+const FOO = Symbol('foo')
+class Test {
+    name = 'default_test';
+    setName = (name) => {
+        this.name = name
+    }
+    [FOO] = 'bar'
+    show(){
+        for(let i of arr.entries()){
+            console.info(i)
+        }
+    }
+}
+let t = new Test
+t.setName('hello')
+console.info('t.name is ==>', t.name)   // hello
+console.info('t.show()')
+t.show()
+console.info('t.foo is ==> ', t[FOO])   // bar
+        `;
+
+        let myCodeMirror = CodeMirror(document.getElementById('code'), {
+            value: code,
+            lineNumbers: true,
+            mode:  "javascript",
+            lineWrapping: true,
+        });
+        function runCode(code){
+            let res;
+            let inter = new estime.Interpreter({
+                __rt: function(val){res = val},
+                console: {
+                    info: innerConsole('info'),
+                    error: innerConsole('error'),
+                    log:innerConsole('log'),
+                    debug: innerConsole('debug'),
+                    warn: innerConsole('warn'),
+                }
+            })
+            document.getElementById('console').innerText = ''
+            try{
+                inter.evaluate(code)
+            }catch(e){
+                innerConsole('error')('执行异常：', e.message)
+                console.error(e)
+                return function(){
+                    return React.createElement('div', {style: {}}, e.message)
+                }
+            }
+            return res
+        }
+        function innerConsole(type){
+            return function(){
+                let args = Array.prototype.slice.call(arguments)
+                let t = args.map(function(item){
+                    return (typeof item == 'object')?JSON.stringify(item):String(item)
+                }).join(' ')
+                t = type + ': ' + t
+                let con = document.getElementById('console')
+                let d = document.createElement('div')
+                d.innerText = t
+                d.setAttribute('style', 'margin-top: 5px;')
+                con.appendChild(d)
+                console[type].apply(console, args)
+            }
+        }
+        document.getElementById('run').addEventListener('click', function(){
+            code = myCodeMirror.getValue()
+            runCode(code)
+        })
+    </script>
+</body>
+</html>

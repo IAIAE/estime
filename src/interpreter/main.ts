@@ -606,6 +606,7 @@ export class Interpreter extends ClosureHandler {
 	protected createClosure(node: Node): BaseClosure {
 		let closure = this.getClosure(node)
 		if (!closure) {
+			console.info('====> ', node)
 			throw this.createInternalThrowError(Messages.NodeTypeSyntaxError, node.type, node);
 		}
 		return (...args: any[]) => {

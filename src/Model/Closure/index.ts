@@ -66,6 +66,7 @@ export class ClosureHandler {
 	JSXIdentifierHandler = handler.JSXIdentifierHandler
 	JSXAttributeHandler = handler.JSXAttributeHandler
 	JSXSpreadAttributeHandler = handler.JSXSpreadAttributeHandler
+	superHandler = handler.superHandler
 
     protected getClosure(this: Interpreter, node: Node): BaseClosure|null {
 		let closure: BaseClosure|null = null;
@@ -76,6 +77,9 @@ export class ClosureHandler {
 				break
 			case 'ClassExpression':
 				closure = this.classExpressionHandler(node);
+				break;
+			case 'Super':
+				closure = this.superHandler(node);
 				break;
 			case "BinaryExpression":
 				closure = this.binaryExpressionHandler(node);
