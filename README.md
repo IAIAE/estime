@@ -214,8 +214,21 @@ Mozilla Public License Version 2.0
 -  [typescript:generator.ts](https://github.com/Microsoft/TypeScript/blob/master/src/compiler/transformers/generators.ts)
 
 
+## 异步队列方案
+
+要在沙箱内部支持异步方法，就必须用js去模拟整个task的执行流程，task分为micro task和macro task。即我们说的大队和小队。Promise入的是小队，setTimeout入的是大队。这里是难点，这一套机制是整个异步流程的基石。
+
+那么，怎么实现大小队呢？参考现有的promise pollyfill库，`promise.js`用的是`asap`，`asap`底层是process.nextTick降级到queueMicrotask再降级到MutationObserver最后降级到setTimeout。那么对于一个沙箱环境，我们是否有必要做得这么复杂呢？
+
+首先明确一点，在浏览器环境，用户可以任意编写方法调用`setTimeout`或是`queueMicrotask`或是`Promise.resolve`等等，浏览器一般并没有限制。所以，当在浏览器实现一个小队的polyfill时候，就需要判断各种各样的api接口是否可用，然后处理各种降级，为的就是当用户调用你的`fakeMicroTask`放入的函数必定比他自己调用`setTimeout`放入的函数后执行。
+
+那么，如果是沙箱环境，任何函数的实际执行都是沙箱决定的，沙箱完全可以只提供一个虚拟的“队列”，无论是`setTimeout`还是`queueMicrotask`还是`Promise.resolve`都放入同一个虚拟队列中，只是他们优先级不一样而已。那么，只要我们沙箱外部环境拥有`setTimeout`的能力(这几乎是100%兼容的)，我们就能够提供这样的虚拟队列，保证沙箱环境的各种不同优先级的异步方法执行；且这样做还有个好处，就是沙箱中的异步方法，永远都是优先级最低的`setTimeout`，不和外部环境抢小队的时间片。
+
+实现虚拟的大小队的标准可以参照[event-loop-processing-model](https://html.spec.whatwg.org/multipage/webappapis.html#event-loop-processing-model)。
+
+
 ## generator相关实现方法
-generator的实现是难点，但其功能又如此重要（异步方法的基石），不得不支持。目前正在纠结中，将generator的定义转换成es5可执行的同等函数，其工作量不亚于再写一个js解释器。有现成的npm包比如`regenerator`可以将generator的代码转换成es5的形式，但其包体大小压缩有都有足足1M，我是肯定不会用的。typescript的源码中带有转换generator的代码，两千多行，不同的是ts只是一个预编译期，我需要的是一个解释器，目前准备复刻并精简这部分代码，看最终能否达到理想效果。如果解析没问题的话，代码生成和ts的有所差异，ts生成的是switch结构的label标签作为定位代码段，这种hard code的方式肯定不符合我动态执行的要求，转而我需要的大概是一个模拟switch行为的路由确定执行代码段。
+generator的实现也是难点，但其功能又如此重要（异步方法语法糖的基础），不得不支持。目前正在纠结中，将generator的定义转换成es5可执行的同等函数，其工作量不亚于再写一个js解释器。有现成的npm包比如`regenerator`可以将generator的代码转换成es5的形式，但其包体大小压缩有都有足足1M，我是肯定不会用的。typescript的源码中带有转换generator的代码，两千多行，不同的是ts只是一个预编译期，我需要的是一个解释器，目前准备复刻并精简这部分代码，看最终能否达到理想效果。如果解析没问题的话，代码生成和ts的有所差异，ts生成的是switch结构的label标签作为定位代码段，这种hard code的方式肯定不符合我动态执行的要求，转而我需要的大概是一个模拟switch行为的路由确定执行代码段。
 
 ts生成的es5代码大概是这样的：
 ```javascript
@@ -298,9 +311,16 @@ es2015\es2017等等申明，个人感觉是非严格的es规范支持声明。es
   - [x] Array.prototype.flat
   - [x] Array.prototype.flatMap
   - [x] Array.prototype.reduceRight
-- [ ] Promises
+- [ ] 异步函数
+  - [x] 虚拟大小队列core
+  - [ ] 虚拟大小队列的自动销毁
+  - [x] setTimeout
+  - [ ] setInterval 不支持，容易造成timer泄露，我鼓励自己用setTimeout来实现interval功能
+  - [ ] Promise
+  - [x] queueMicrotask
 - [ ] Generators
 - [ ] async/await
+  - [X] Async generator functions 不支持
 - [x] JSX支持，其中不支持JSXFragments、JSXNamespacedName和JSXSpreadChild。JSX标准参考[fb的jsx specification](https://facebook.github.io/jsx/)
   - [x] JSXElement
   - [x] JSXIdentifier for React IntrinsicElement

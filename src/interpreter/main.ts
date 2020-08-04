@@ -20,6 +20,8 @@ let MyParser = Parser.extend(
 	require('acorn-jsx')(),
 )
 
+import {MacroTaskList} from '../Model/Task'
+
 const version = "%VERSION%";
 
 /////////types/////////
@@ -250,9 +252,9 @@ if (typeof JSON !== "undefined") {
 }
 
 //ES6 Object
-if (typeof Promise !== "undefined") {
-	BuildInObjects.Promise = Promise;
-}
+// if (typeof Promise !== "undefined") {
+// 	BuildInObjects.Promise = Promise;
+// }
 
 if (typeof Set !== "undefined") {
 	BuildInObjects.Set = Set;
@@ -308,6 +310,7 @@ export class Interpreter extends ClosureHandler {
 	protected currentContext: Context;
 	protected options: Options;
 	protected callStack: string[];
+	protected taskManager: MacroTaskList;
 	// 编译时存放变量提升的var和function
 	protected collectDeclVars: CollectDeclarations = Object.create(null);
 	protected collectDeclFuncs: CollectDeclarations = Object.create(null);
@@ -338,6 +341,7 @@ export class Interpreter extends ClosureHandler {
 			_initEnv: options._initEnv,
 		};
 
+		this.taskManager = new MacroTaskList()
 		this.context = context || Object.create(null);
 		this.callStack = [];
 		// console.info('this i s ', this )
@@ -373,6 +377,14 @@ export class Interpreter extends ClosureHandler {
 		let smbl;
 		this.globalScope.data['Symbol'] = smbl = createSymbolFunc()
 		this.globalScope.data['Array'] = createArrayClass(smbl)
+		this.globalScope.data['setTimeout'] = (fn, delay, ...args) => {
+			this.taskManager.queue(()=>{
+				fn.apply(null, args)
+			}, delay)
+		}
+		this.globalScope.data['queueMicrotask'] = (fn) => {
+			this.taskManager.microQueue(fn)
+		}
 		this.currentScope = this.globalScope;
 		//init global context to this
 		this.globalContext = scope.data;
