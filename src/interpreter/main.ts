@@ -13,6 +13,8 @@ import { Break, Continue, DefaultCase, EmptyStatementReturn, GlobalScopeName, Ro
 import { BreakLabel, ContinueLabel, Return } from '../Model/TokenClass'
 import { isFunction } from '../util'
 import { createArrayClass } from '../Model/Array';
+import {MacroTaskList} from '../Model/Task'
+import {createPromiseClass} from '../Model/Promise'
 
 let MyParser = Parser.extend(
 	require('acorn-class-fields'),
@@ -20,7 +22,7 @@ let MyParser = Parser.extend(
 	require('acorn-jsx')(),
 )
 
-import {MacroTaskList} from '../Model/Task'
+
 
 const version = "%VERSION%";
 
@@ -385,6 +387,7 @@ export class Interpreter extends ClosureHandler {
 		this.globalScope.data['queueMicrotask'] = (fn) => {
 			this.taskManager.microQueue(fn)
 		}
+		this.globalScope.data['Promise'] = createPromiseClass(this.taskManager)
 		this.currentScope = this.globalScope;
 		//init global context to this
 		this.globalContext = scope.data;

@@ -26,6 +26,9 @@ setTimeout(()=>{
 queueMicrotask(()=>{
     arr.push(1)
 })
+Promise.resolve(null).then(()=>{
+    arr.push(1.1)
+})
 
 rt(arr)
 `);

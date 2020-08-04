@@ -1,6 +1,6 @@
 {
 	"name": "estime",
-	"version": "1.1.1",
+	"version": "1.2.0",
 	"description": "estime = ecmascript + runtime, in javascipt(es5) environment",
 	"main": "./dist/cjs/index.js",
 	"module": "./dist/esm/index.js",

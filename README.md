@@ -311,12 +311,12 @@ es2015\es2017等等申明，个人感觉是非严格的es规范支持声明。es
   - [x] Array.prototype.flat
   - [x] Array.prototype.flatMap
   - [x] Array.prototype.reduceRight
-- [ ] 异步函数
+- [x] 异步函数
   - [x] 虚拟大小队列core
   - [ ] 虚拟大小队列的自动销毁
   - [x] setTimeout
-  - [ ] setInterval 不支持，容易造成timer泄露，我鼓励自己用setTimeout来实现interval功能
-  - [ ] Promise
+  - [x] setInterval 不支持，容易造成timer泄露，我鼓励自己用setTimeout来实现interval功能
+  - [x] Promise
   - [x] queueMicrotask
 - [ ] Generators
 - [ ] async/await
