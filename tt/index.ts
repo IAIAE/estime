@@ -13,30 +13,23 @@ let inter = new Interpreter({
 })
 
 inter.evaluate( `
-const arr = ['hello', 'world', 'estime']
-const FOO = Symbol('foo')
-class T {
-    constructor(){
-        console.info('cons in T')
-    }
-}
-class Test extends T{
-    constructor(){
-        super()
-        console.info('cons in Test')
-    }
-    name = 'default_test';
-    setName = (name) => {
-        this.name = name
-    }
-    [FOO] = 'bar'
-    show(){
-        for(let i of arr.entries()){
-            console.info(i)
-        }
-    }
-}
-let t = new Test
-console.info('t.foo is ==> ', t[FOO])   // bar
+let arr = []
+setTimeout(()=>{
+    arr.push(4)
+}, 10)
+setTimeout(()=>{
+    arr.push(2)
+    queueMicrotask(()=>{
+        arr.push(3)
+    })
+}, 0)
+queueMicrotask(()=>{
+    arr.push(1)
+})
+
+rt(arr)
 `);
-console.info('res ', res)
+
+setTimeout(()=>{
+    console.info('res ', res)
+}, 100)
