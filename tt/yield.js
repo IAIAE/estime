@@ -1,14 +1,31 @@
+
+
+
 async function test(){
-    let t = await ttt()
-    return 123
+    let i = 123;
+    console.info(this)
+    if(i){
+        await 123
+    }
+    return i
 }
 
-function ttt(){
-    return new Promise((done, notDone)=>{
-        setTimeout(()=>{
-            done('hello world');
-        }, 2000)
-    })
+let t = {
+    *ttt(){
+        let i = 123
+        if(i){
+            console.info(this)
+            yield Promise.resolve(123)
+        }
+        return i
+    }
 }
 
-let iter = test()
+function* ttt(){
+    let i = 123
+    if(i){
+        console.info(this)
+        yield Promise.resolve(123)
+    }
+    return i
+}

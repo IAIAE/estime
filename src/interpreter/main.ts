@@ -23,7 +23,6 @@ let MyParser = Parser.extend(
 )
 
 
-
 const version = "%VERSION%";
 
 /////////types/////////

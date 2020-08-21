@@ -204,14 +204,14 @@ class Test {
 
 <img src="https://raw.githubusercontent.com/IAIAE/estime/master/docs/img/jsx-demo.gif" width="400" />
 
-## License
-Mozilla Public License Version 2.0
+
 
 ## 相关
 
 -  [evaljs](https://github.com/marten-de-vries/evaljs)
 -  [closure-interpreter](https://github.com/int3/closure-interpreter)
 -  [typescript:generator.ts](https://github.com/Microsoft/TypeScript/blob/master/src/compiler/transformers/generators.ts)
+-  [ecmascript-Specification](http://www.ecma-international.org/ecma-262/#sec-intro)
 
 
 ## 异步队列方案
@@ -228,43 +228,9 @@ Mozilla Public License Version 2.0
 
 
 ## generator相关实现方法
-generator的实现也是难点，但其功能又如此重要（异步方法语法糖的基础），不得不支持。目前正在纠结中，将generator的定义转换成es5可执行的同等函数，其工作量不亚于再写一个js解释器。有现成的npm包比如`regenerator`可以将generator的代码转换成es5的形式，但其包体大小压缩有都有足足1M，我是肯定不会用的。typescript的源码中带有转换generator的代码，两千多行，不同的是ts只是一个预编译期，我需要的是一个解释器，目前准备复刻并精简这部分代码，看最终能否达到理想效果。如果解析没问题的话，代码生成和ts的有所差异，ts生成的是switch结构的label标签作为定位代码段，这种hard code的方式肯定不符合我动态执行的要求，转而我需要的大概是一个模拟switch行为的路由确定执行代码段。
+generator的实现也是难点，但其功能又如此重要（异步方法语法糖的基础），不得不支持。目前正在纠结中，将generator的定义转换成es5可执行的同等函数，其工作量不亚于再写一个js解释器。有现成的npm包比如`regenerator`可以将generator的代码转换成es5的形式，但其包体大小压缩有都有足足1M，我是肯定不会用的。typescript的源码中也带有转换generator，但由于依赖挺多的，拆分出来的成本较大。经过一段时间的源码阅读，发现`regenerator`实际是基于babel-plugin写的一个ast替换插件，整体核心部分大致有2000+行代码，加上运行时600行代码，比较合理。不过`regenerator`基于babel-plugin，用到了babylon的语法分析能力，也基于babel-types和babel的travel能力，这部分代码庞大，需要去掉自己写；且babylon的语法分析结果和acorn.js的语法分析声明的都是遵守estree，不过两者最终输出的ast结构还是有差异的，estime基于acorn做语义分析，这部分适配工作也需要自己做。
 
-ts生成的es5代码大概是这样的：
-```javascript
-function f() {
-  var /*locals*/;
-  /*functions*/
-  return __generator(function (state) {
-    switch (state.label) {
-      /*cases per label*/
-    }
-  });
-}
-```
-
-而我们需要构造的runtime方法大概是这样的：
-```javascript
-function f(){
-  var /*locals*/;
-  /*functions*/
-  let __block_label_map = {
-    0: someBlockClosure,
-    1: someBlockClosure,
-    // ...
-  }
-  return __generator(function(state){
-    let res;
-    for(let i=shareObj.label; i<=10; i++){
-        if(res = mapp[shareObj.label].call(this, shareObj)){
-            return res
-        }
-    }
-  })
-}
-```
-这样我们就可以专注于生成每个代码段的closure，而复用一个统一形式的方法了。
-另外需要注意的是someBlockClosure可以单独定义一个handler和type。它和函数类似采用初始化时作用域(能够访问同级的var变量，而不是访问调用时候的作用域)，而在执行的时候又不单独生成scope。因为我们可以确定someBlockClosure中是没有变量定义的，这样就减少了用函数closure时不必要的创建scope开销。
+整体思路很简单，如果遇到了async或generator函数，先进行ast的转译，然后再进行接下来的编译闭包工作。对ast的转译工作单独放在了这个库里：[estime-resync](https://github.com/IAIAE/estime-resync)。
 
 # todoList
 es2015\es2017等等申明，个人感觉是非严格的es规范支持声明。es的规范会经过不同stage的提案状态，有些特性还在stage-1等就已经放出来开始广泛使用了。所以对于es2015，你会看到有“对象解构”，但是实际上在2015年的时候，它还不是stage-4。我看acorn.js在es2018才支持解构，但是babel的文档上，es2015就已经包含解构了，这样的差异还真不好细究清楚，且深究也没有意义。所以，我没有局限在2015还是2017上，关注的是特性，需要支持的特性下面的todolist都会列出来。
@@ -331,3 +297,7 @@ es2015\es2017等等申明，个人感觉是非严格的es规范支持声明。es
   - [ ] AST的压缩（可能是二进制）表示形式
   - [ ] 源码打包器
   - [ ] 压缩AST解释器runtime
+
+
+## License
+Mozilla Public License Version 2.0

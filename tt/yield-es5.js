@@ -728,33 +728,95 @@ try {
   Function("r", "regeneratorRuntime = r")(runtime);
 }
 
+var _marked = /*#__PURE__*/regeneratorRuntime.mark(ttt);
+
 function test() {
-  var t;
+  var i;
   return regeneratorRuntime.async(function test$(_context) {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
-          _context.next = 2;
-          return regeneratorRuntime.awrap(ttt());
+          i = 123;
+          console.info(this);
 
-        case 2:
-          t = _context.sent;
-          return _context.abrupt("return", 123);
+          if (!i) {
+            _context.next = 5;
+            break;
+          }
 
-        case 4:
+          _context.next = 5;
+          return regeneratorRuntime.awrap(123);
+
+        case 5:
+          return _context.abrupt("return", i);
+
+        case 6:
         case "end":
           return _context.stop();
       }
     }
-  }, null, null, null, Promise);
+  }, null, this, null, Promise);
 }
+
+var t = {
+  ttt() {
+    var _this = this;
+
+    return /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+      var i;
+      return regeneratorRuntime.wrap(function _callee$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              i = 123;
+
+              if (!i) {
+                _context2.next = 5;
+                break;
+              }
+
+              console.info(_this);
+              _context2.next = 5;
+              return Promise.resolve(123);
+
+            case 5:
+              return _context2.abrupt("return", i);
+
+            case 6:
+            case "end":
+              return _context2.stop();
+          }
+        }
+      }, _callee);
+    })();
+  }
+
+};
 
 function ttt() {
-  return new Promise(function (done, notDone) {
-    setTimeout(function () {
-      done('hello world');
-    }, 2000);
-  });
-}
+  var i;
+  return regeneratorRuntime.wrap(function ttt$(_context3) {
+    while (1) {
+      switch (_context3.prev = _context3.next) {
+        case 0:
+          i = 123;
 
-var iter = test();
+          if (!i) {
+            _context3.next = 5;
+            break;
+          }
+
+          console.info(this);
+          _context3.next = 5;
+          return Promise.resolve(123);
+
+        case 5:
+          return _context3.abrupt("return", i);
+
+        case 6:
+        case "end":
+          return _context3.stop();
+      }
+    }
+  }, _marked, this);
+}
