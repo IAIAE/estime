@@ -1,6 +1,6 @@
 {
 	"name": "estime",
-	"version": "1.2.0",
+	"version": "1.3.0",
 	"description": "estime = ecmascript + runtime, in javascipt(es5) environment",
 	"main": "./dist/cjs/index.js",
 	"module": "./dist/esm/index.js",
@@ -58,10 +58,11 @@
 		"@babel/runtime": "^7.8.4",
 		"@types/acorn": "^4.0.5",
 		"@types/estree": "0.0.41",
-		"acorn": "^7.1.0",
+		"acorn": "^7.4.1",
 		"acorn-class-fields": "^0.3.6",
 		"acorn-jsx": "^5.2.0",
-		"acorn-static-class-features": "^0.2.3"
+		"acorn-static-class-features": "^0.2.3",
+		"acorn-walk": "^8.1.0"
 	},
 	"browserslist": [
 		">=0.25%",

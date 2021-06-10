@@ -16,11 +16,12 @@ import { createArrayClass } from '../Model/Array';
 import {MacroTaskList} from '../Model/Task'
 import {createPromiseClass} from '../Model/Promise'
 
-let MyParser = Parser.extend(
+export let MyParser = Parser.extend(
 	require('acorn-class-fields'),
 	require('acorn-static-class-features'),
 	require('acorn-jsx')(),
 )
+
 
 
 const version = "%VERSION%";
